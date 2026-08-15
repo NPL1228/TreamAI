@@ -1,0 +1,25 @@
+# Python / Backend
+venv/
+__pycache__/
+*.pyc
+.env
+
+# Databases
+fyp.db
+chroma_db/
+
+# Secrets and Keys
+credentials.json
+client_secret_*.json
+private.key
+cert.pem
+
+# Frontend / React
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# OS Specific
+.DS_Store
+Thumbs.db

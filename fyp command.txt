@@ -1,0 +1,13 @@
+fyp command
+
+Run agent:
+cd C:\Users\Gigabyte\Desktop\Teamora
+uvicorn main:app --port 8443
+
+Run ngrok:
+cd C:\Users\Gigabyte\Desktop\Teamora
+ngrok http 8443
+
+View Database:
+python view_sqlite.py
+C:\Users\Gigabyte\AppData\Local\Programs\Python\Python310\python.exe view_chroma.py
