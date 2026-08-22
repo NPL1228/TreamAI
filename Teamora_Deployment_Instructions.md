@@ -43,12 +43,16 @@ pip install -r requirements.txt
 ```bash
 openssl req -newkey rsa:2048 -sha256 -nodes \
   -keyout private.key -x509 -days 365 -out cert.pem \
-  -subj "/CN=YOUR_ORACLE_IP"
+  -subj "/CN=161.118.201.230"
 ```
 
 ### Create .env file:
 ```
 GEMINI_API_KEY=your_key_here
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=teamorasupport@gmail.com
+SMTP_PASSWORD=your_app_password
 ```
 *(Note: Changed from Anthropic to Gemini to reflect our updated LLM pipeline).*
 

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ChatRoom from './pages/ChatRoom';
@@ -33,18 +34,22 @@ function App() {
       <Routes>
         <Route 
           path="/login" 
-          element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} 
+          element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/dashboard" />} 
         />
         <Route 
           path="/forgot-password" 
-          element={!user ? <ForgotPassword /> : <Navigate to="/" />} 
+          element={!user ? <ForgotPassword /> : <Navigate to="/dashboard" />} 
         />
         <Route 
           path="/reset-password" 
-          element={!user ? <ResetPassword /> : <Navigate to="/" />} 
+          element={!user ? <ResetPassword /> : <Navigate to="/dashboard" />} 
         />
         <Route 
           path="/" 
+          element={!user ? <Landing /> : <Navigate to="/dashboard" />} 
+        />
+        <Route 
+          path="/dashboard" 
           element={user ? <Layout user={user} onLogout={handleLogout}><Dashboard user={user} /></Layout> : <Navigate to="/login" />} 
         />
         <Route 

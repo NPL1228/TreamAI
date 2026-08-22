@@ -115,9 +115,8 @@ export default function Layout({ user, onLogout, children }) {
           overflowY: 'hidden'
         }}>
         
-          {/* User Profile */}
           <div style={{ padding: '0 20px', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate('/')}>Teamora</h2>
+            <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>Teamora</h2>
             <p style={{ margin: '5px 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user}</p>
           </div>
 
