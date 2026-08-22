@@ -15,7 +15,7 @@ export default function ResetPassword() {
   const token = queryParams.get('token');
 
   useEffect(() => {
-    document.title = 'Reset Password | Teamora';
+    document.title = 'Reset Password | TreamAI';
     if (!token) {
       setStatus({ type: 'error', message: 'Invalid or missing reset token.' });
     }

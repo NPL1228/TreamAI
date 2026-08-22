@@ -1,11 +1,11 @@
 fyp command
 
 Run agent:
-cd C:\Users\Gigabyte\Desktop\Teamora
+cd C:\Users\Gigabyte\Desktop\TreamAI
 uvicorn main:app --port 8443
 
 Run ngrok:
-cd C:\Users\Gigabyte\Desktop\Teamora
+cd C:\Users\Gigabyte\Desktop\TreamAI
 ngrok http 8443
 
 View Database:

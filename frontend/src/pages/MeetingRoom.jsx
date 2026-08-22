@@ -8,7 +8,7 @@ export default function MeetingRoom({ user }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = `Meeting: ${meetingId} | Teamora`;
+    document.title = `Meeting: ${meetingId} | TreamAI`;
   }, [meetingId]);
 
   return (
@@ -26,7 +26,7 @@ export default function MeetingRoom({ user }) {
       <div style={{ flex: 1 }}>
         <JitsiMeeting
           domain="meet.jit.si"
-          roomName={`Teamora_${meetingId}`}
+          roomName={`TreamAI_${meetingId}`}
           configOverwrite={{
             startWithAudioMuted: true,
             disableModeratorIndicator: true,

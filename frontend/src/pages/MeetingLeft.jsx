@@ -6,7 +6,7 @@ export default function MeetingLeft() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Meeting Ended | Teamora';
+    document.title = 'Meeting Ended | TreamAI';
   }, []);
 
   return (

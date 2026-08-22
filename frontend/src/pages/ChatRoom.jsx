@@ -12,7 +12,7 @@ export default function ChatRoom({ user }) {
   const [chatInfo, setChatInfo] = useState(null);
 
   useEffect(() => {
-    document.title = chatInfo ? `${chatInfo.chat_name} | Teamora` : `Chat: ${chatId} | Teamora`;
+    document.title = chatInfo ? `${chatInfo.chat_name} | TreamAI` : `Chat: ${chatId} | TreamAI`;
   }, [chatId, chatInfo]);
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export default function ChatRoom({ user }) {
           
           {messages.map((msg, idx) => {
             const isMe = msg.sender === user;
-            const isAgent = msg.sender === 'Teamora Agent';
+            const isAgent = msg.sender === 'TreamAI Agent';
 
             return (
               <div key={idx} style={{
@@ -159,7 +159,7 @@ export default function ChatRoom({ user }) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Message this chat... (use @agent to ask Teamora)"
+              placeholder="Message this chat... (use @agent to ask TreamAI)"
               className="input-field"
               style={{ flex: 1, borderRadius: '24px', padding: '20px 25px', fontSize: '1.1rem' }}
             />

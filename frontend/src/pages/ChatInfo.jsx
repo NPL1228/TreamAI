@@ -16,7 +16,7 @@ export default function ChatInfo({ user }) {
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
   useEffect(() => {
-    document.title = `Chat Info | Teamora`;
+    document.title = `Chat Info | TreamAI`;
     fetchChatInfo();
   }, [chatId]);
 
@@ -158,7 +158,7 @@ export default function ChatInfo({ user }) {
           <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
             <div>
               <h3 style={{ fontSize: '1.1rem', margin: '0 0 5px 0' }}>AI Agent Listening</h3>
-              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>When enabled, Teamora will listen to generate memories and assist you.</p>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>When enabled, TreamAI will listen to generate memories and assist you.</p>
             </div>
             
             {/* Custom Toggle Switch */}
@@ -197,7 +197,7 @@ export default function ChatInfo({ user }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {chatInfo.members?.map((member, idx) => (
               <div key={idx} style={{ padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'Teamora Agent' ? 'var(--primary)' : 'var(--text)' }}>
+                <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : 'var(--text)' }}>
                   {member.username} {member.username === user && '(You)'}
                 </span>
                 <span style={{ fontSize: '0.85rem', padding: '4px 12px', background: member.role === 'owner' ? 'rgba(234, 179, 8, 0.2)' : 'rgba(255,255,255,0.1)', color: member.role === 'owner' ? '#eab308' : 'var(--text-muted)', borderRadius: '20px', textTransform: 'capitalize' }}>

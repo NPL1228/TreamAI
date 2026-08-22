@@ -14,7 +14,7 @@ export default function FriendsList({ user }) {
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
   useEffect(() => {
-    document.title = 'Friends | Teamora';
+    document.title = 'Friends | TreamAI';
     fetchData();
   }, [user]);
 

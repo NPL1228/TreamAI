@@ -25,7 +25,7 @@ export default function Dashboard({ user, onLogout }) {
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
   useEffect(() => {
-    document.title = 'Dashboard | Teamora';
+    document.title = 'Dashboard | TreamAI';
     fetchData();
   }, [user]);
 

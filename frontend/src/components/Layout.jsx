@@ -47,8 +47,8 @@ export default function Layout({ user, onLogout, children }) {
   const teamChats = chats.filter(c => c.chat_type === 'team');
   const privateChats = chats.filter(c => c.chat_type === 'private');
   
-  const agentChat = privateChats.find(c => c.chat_name === 'Teamora Agent');
-  const otherPrivateChats = privateChats.filter(c => c.chat_name !== 'Teamora Agent').slice(0, 3);
+  const agentChat = privateChats.find(c => c.chat_name === 'TreamAI Agent');
+  const otherPrivateChats = privateChats.filter(c => c.chat_name !== 'TreamAI Agent').slice(0, 3);
   const displayPrivateChats = agentChat ? [agentChat, ...otherPrivateChats] : otherPrivateChats.slice(0, 4);
 
   const displayTeamChats = teamChats.slice(0, 3);
@@ -116,7 +116,7 @@ export default function Layout({ user, onLogout, children }) {
         }}>
         
           <div style={{ padding: '0 20px', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>Teamora</h2>
+            <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>TreamAI</h2>
             <p style={{ margin: '5px 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user}</p>
           </div>
 
@@ -155,13 +155,13 @@ export default function Layout({ user, onLogout, children }) {
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: '10px', 
-                      background: chat.chat_name === 'Teamora Agent' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                      border: chat.chat_name === 'Teamora Agent' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent'
+                      background: chat.chat_name === 'TreamAI Agent' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                      border: chat.chat_name === 'TreamAI Agent' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent'
                     }}
                     className="hover-bg"
                   >
-                    <MessageSquare size={16} color={chat.chat_name === 'Teamora Agent' ? 'var(--primary)' : 'var(--text-muted)'} />
-                    <span style={{ fontSize: '0.95rem', fontWeight: chat.chat_name === 'Teamora Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
+                    <MessageSquare size={16} color={chat.chat_name === 'TreamAI Agent' ? 'var(--primary)' : 'var(--text-muted)'} />
+                    <span style={{ fontSize: '0.95rem', fontWeight: chat.chat_name === 'TreamAI Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
                   </div>
                 ))}
                 {privateChats.length > 4 && (

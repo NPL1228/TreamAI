@@ -8,7 +8,7 @@ export default function Landing() {
       <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquare size={28} />
-          Teamora
+          TreamAI
         </div>
         <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
           <a href="#about" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }} className="hover-text-primary">About</a>
@@ -25,7 +25,7 @@ export default function Landing() {
           The Smartest Way For Your <br/> <span style={{ color: 'var(--primary)' }}>Team to Collaborate</span>
         </h1>
         <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', maxWidth: '600px', marginBottom: '40px', lineHeight: '1.6' }}>
-          Teamora is an AI-powered workspace that actively listens, stores your team's decisions, and fetches memories instantly. Never lose context again.
+          TreamAI is an AI-powered workspace that actively listens, stores your team's decisions, and fetches memories instantly. Never lose context again.
         </p>
         <Link to="/login" className="btn-primary" style={{ fontSize: '1.2rem', padding: '15px 40px', display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
           Get Started <ArrowRight size={20} />
@@ -41,7 +41,7 @@ export default function Landing() {
           <FeatureCard 
             icon={<MessageSquare size={32} color="#10b981" />} 
             title="Smart Agent" 
-            description="Have a 1-on-1 private chat with the Teamora Agent to update or query team knowledge." 
+            description="Have a 1-on-1 private chat with the TreamAI Agent to update or query team knowledge." 
           />
           <FeatureCard 
             icon={<Shield size={32} color="#f59e0b" />} 
@@ -53,8 +53,8 @@ export default function Landing() {
 
       {/* Footer */}
       <footer id="contact" style={{ padding: '40px', textAlign: 'center', borderTop: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-        <p>&copy; {new Date().getFullYear()} Teamora. Final Year Project.</p>
-        <p style={{ fontSize: '0.9rem', marginTop: '10px' }}>Contact: teamorasupport@gmail.com</p>
+        <p>&copy; {new Date().getFullYear()} TreamAI. Final Year Project.</p>
+        <p style={{ fontSize: '0.9rem', marginTop: '10px' }}>Contact: treamaisupport@gmail.com</p>
       </footer>
     </div>
   );

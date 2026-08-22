@@ -101,7 +101,7 @@ async def startup():
 
 @app.get("/")
 async def root():
-    return {"status": "Teamora Backend Running"}
+    return {"status": "TreamAI Backend Running"}
 
 def send_reset_email(to_email: str, reset_link: str):
     smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
@@ -115,9 +115,9 @@ def send_reset_email(to_email: str, reset_link: str):
         return
         
     msg = MIMEMultipart('alternative')
-    msg['From'] = f"Teamora Support <{smtp_user}>"
+    msg['From'] = f"TreamAI Support <{smtp_user}>"
     msg['To'] = to_email
-    msg['Subject'] = "Password Reset Request - Teamora"
+    msg['Subject'] = "Password Reset Request - TreamAI"
     
     html_content = f"""
     <html>
@@ -125,13 +125,13 @@ def send_reset_email(to_email: str, reset_link: str):
         <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
           
           <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 1px;">Teamora</h1>
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 1px;">TreamAI</h1>
           </div>
           
           <div style="padding: 40px 30px; text-align: center;">
             <h2 style="color: #1f2937; font-size: 20px; margin-top: 0;">Password Reset Request</h2>
             <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
-              We received a request to reset the password for your Teamora account. 
+              We received a request to reset the password for your TreamAI account. 
               Click the button below to choose a new password.
             </p>
             
@@ -147,7 +147,7 @@ def send_reset_email(to_email: str, reset_link: str):
           
           <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
             <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-              &copy; {datetime.datetime.now().year if 'datetime' in globals() else '2026'} Teamora Inc. All rights reserved.<br>
+              &copy; {datetime.datetime.now().year if 'datetime' in globals() else '2026'} TreamAI Inc. All rights reserved.<br>
               If you did not request a password reset, please safely ignore this email.
             </p>
           </div>
@@ -290,13 +290,13 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
             # Update chat activity
             update_chat_activity(chat_id)
             
-            # Send to Teamora bot logic
+            # Send to TreamAI bot logic
             response = await handle_message(chat_id, text, username)
             
-            # If Teamora has a response, persist and broadcast it
+            # If TreamAI has a response, persist and broadcast it
             if response:
-                save_message(chat_id, "Teamora Agent", response)
-                agent_msg = json.dumps({"sender": "Teamora Agent", "text": response})
+                save_message(chat_id, "TreamAI Agent", response)
+                agent_msg = json.dumps({"sender": "TreamAI Agent", "text": response})
                 await manager.broadcast(agent_msg, chat_id)
                 
     except WebSocketDisconnect:

@@ -1,8 +1,8 @@
-# Teamora — Full System Design & Development Instructions
+# TreamAI — Full System Design & Development Instructions
 
 ## Project Overview
 
-**Teamora** is an LLM-powered team collaboration assistant built as a Final Year Project (FYP).
+**TreamAI** is an LLM-powered team collaboration assistant built as a Final Year Project (FYP).
 
 The core research contribution is a **self-adaptive memory retrieval system** — not the chat interface itself.
 
@@ -557,7 +557,7 @@ async def websocket_endpoint(websocket: WebSocket,
 ## Project File Structure
 
 ```
-teamora/
+treamai/
   ├── main.py                      ← FastAPI + WebSocket entry point
   ├── bot.py                       ← message routing logic
   ├── memory/
@@ -620,7 +620,7 @@ Phase 5 — Frontend:
 
 Phase 6 — Evaluation:
   → Generate synthetic dataset from AMI/QMSum
-  → Baseline RAG vs Teamora comparison
+  → Baseline RAG vs TreamAI comparison
   → Retrieval quality metrics
 ```
 

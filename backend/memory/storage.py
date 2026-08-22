@@ -268,10 +268,10 @@ def register_user(username: str, email: str, password_hash: str) -> bool:
     try:
         conn.execute("INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)", (username, email, password_hash))
         
-        # Auto-generate a private chat with the Teamora Agent
+        # Auto-generate a private chat with the TreamAI Agent
         ai_chat_id = f"ai-{username}-{random.randint(1000, 9999)}"
         conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, ?)", 
-                     (ai_chat_id, "Teamora Agent", "private"))
+                     (ai_chat_id, "TreamAI Agent", "private"))
         conn.execute("INSERT INTO Chat_Members (chat_id, user_name) VALUES (?, ?)", 
                      (ai_chat_id, username))
                      

@@ -17,15 +17,15 @@ import Layout from './components/Layout';
 import './index.css';
 
 function App() {
-  const [user, setUser] = useState(() => localStorage.getItem('teamora_user'));
+  const [user, setUser] = useState(() => localStorage.getItem('treamai_user'));
 
   const handleLogin = (username) => {
-    localStorage.setItem('teamora_user', username);
+    localStorage.setItem('treamai_user', username);
     setUser(username);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('teamora_user');
+    localStorage.removeItem('treamai_user');
     setUser(null);
   };
 

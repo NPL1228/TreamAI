@@ -10,7 +10,7 @@ export default function ChatList({ user, type }) {
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
   useEffect(() => {
-    document.title = type === 'private' ? 'Private Chats | Teamora' : 'Team Chats | Teamora';
+    document.title = type === 'private' ? 'Private Chats | TreamAI' : 'Team Chats | TreamAI';
     fetchChats();
   }, [user, type]);
 
@@ -31,7 +31,7 @@ export default function ChatList({ user, type }) {
   
   // Sort Agent to top for private chats if present
   if (type === 'private') {
-    const agentIndex = filteredChats.findIndex(c => c.chat_name === 'Teamora Agent');
+    const agentIndex = filteredChats.findIndex(c => c.chat_name === 'TreamAI Agent');
     if (agentIndex > -1) {
       const agent = filteredChats.splice(agentIndex, 1)[0];
       filteredChats.unshift(agent);
@@ -88,18 +88,18 @@ export default function ChatList({ user, type }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: chat.chat_name === 'Teamora Agent' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                border: chat.chat_name === 'Teamora Agent' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent'
+                background: chat.chat_name === 'TreamAI Agent' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                border: chat.chat_name === 'TreamAI Agent' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent'
               }}
               className="hover-bg"
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 {type === 'private' ? (
-                  <MessageSquare size={20} color={chat.chat_name === 'Teamora Agent' ? 'var(--primary)' : 'var(--text-muted)'} />
+                  <MessageSquare size={20} color={chat.chat_name === 'TreamAI Agent' ? 'var(--primary)' : 'var(--text-muted)'} />
                 ) : (
                   <Hash size={20} color="var(--text-muted)" />
                 )}
-                <span style={{ fontSize: '1.1rem', fontWeight: chat.chat_name === 'Teamora Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: chat.chat_name === 'TreamAI Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
               </div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
                 {formatTimeAgo(chat.last_activity)}

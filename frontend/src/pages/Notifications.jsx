@@ -10,7 +10,7 @@ export default function Notifications({ user }) {
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
   useEffect(() => {
-    document.title = 'Notifications | Teamora';
+    document.title = 'Notifications | TreamAI';
     fetchData();
   }, [user]);
 

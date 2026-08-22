@@ -6,7 +6,7 @@ export default function Settings({ user }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Settings | Teamora';
+    document.title = 'Settings | TreamAI';
   }, []);
 
   return (
