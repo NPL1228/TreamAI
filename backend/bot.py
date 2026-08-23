@@ -28,8 +28,8 @@ async def handle_message(chat_id: str, text: str, user_name: str):
 
         # Route 1: Private Chat with TreamAI Agent
         if chat_type == "private" and chat_name == "TreamAI Agent":
-            print(">>> Private Agent Pipeline")
-            response = private_agent_pipeline.process_private_message(chat_id, text, user_name)
+            print(">>> Private Agent Chat (Normal Chatbot)")
+            response = retrieval_pipeline.retrieve_and_respond(chat_id, text)
             if response and "text" in response:
                 return response["text"]
             return None
@@ -40,6 +40,22 @@ async def handle_message(chat_id: str, text: str, user_name: str):
             return None
 
         # Route 3: Team Space
+        
+        # Check for inline action commands triggered by buttons
+        if text.startswith("?ACTION:"):
+            action_str = text.replace("?ACTION:", "").strip()
+            parts = action_str.split(":", 1)
+            action_name = parts[0]
+            params = {}
+            if len(parts) > 1:
+                params["project_name"] = parts[1]
+                
+            print(f">>> Action Pipeline: {action_name}")
+            response = storage_pipeline.handle_action(chat_id, action_name, params)
+            if response and "text" in response:
+                return response["text"]
+            return None
+            
         if is_mentioned or is_query:
             query = text.lstrip("?").replace("@agent", "").strip()
             print(">>> Retrieval Pipeline")

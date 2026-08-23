@@ -57,7 +57,12 @@ def retrieve_and_respond(chat_id: str, query: str) -> dict:
     top_nodes = [n[1] for n in scored_nodes[:5]] # Take top 5
     
     # 2. LLM Generation
-    raw_response_text = gemini.generate_response(query, top_nodes)
+    chat_history = storage.get_chat_history(chat_id, limit=6)
+    # Exclude the current query from history as it's passed separately
+    if chat_history and chat_history[-1]["text"] == query:
+        chat_history = chat_history[:-1]
+        
+    raw_response_text = gemini.generate_response(query, top_nodes, chat_history)
     
     # Parse the USED: [id] array from the response and strip it
     import re
@@ -104,13 +109,5 @@ def retrieve_and_respond(chat_id: str, query: str) -> dict:
             chroma.update_access(chat_id, node["id"], new_count, str(int(time.time())))
             
     return {
-        "hostAppDataAction": {
-            "chatDataAction": {
-                "createMessageAction": {
-                    "message": {
-                        "text": response_text
-                    }
-                }
-            }
-        }
+        "text": response_text
     }

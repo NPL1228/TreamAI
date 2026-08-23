@@ -86,55 +86,7 @@ def summarize_and_store(chat_id: str, messages: list):
         print(f"Summarization took {time.time() - start_time:.2f}s")
 
         return {
-            "cardsV2": [
-                {
-                    "cardId": "new_project",
-                    "card": {
-                        "header": {
-                            "title": "New Project Detected"
-                        },
-                        "sections": [
-                            {
-                                "widgets": [
-                                    {
-                                        "textParagraph": {
-                                            "text": f"I noticed discussion about **{suggested}**.\n\nWould you like me to create this project?"
-                                        }
-                                    },
-                                    {
-                                        "buttonList": {
-                                            "buttons": [
-                                                {
-                                                    "text": "Create",
-                                                    "onClick": {
-                                                        "action": {
-                                                            "function": "create_project",
-                                                            "parameters": [
-                                                                {
-                                                                    "key": "project_name",
-                                                                    "value": suggested
-                                                                }
-                                                            ]
-                                                        }
-                                                    }
-                                                },
-                                                {
-                                                    "text": "Ignore",
-                                                    "onClick": {
-                                                        "action": {
-                                                            "function": "ignore_project"
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
+            "text": f"It looks like you're discussing a new project. Should I create **{suggested}** as a new project?\n\n[[Yes|?ACTION:create_project:{suggested}]] [[No|?ACTION:ignore_project]]"
         }
 
     print(f"Summarization took {time.time() - start_time:.2f}s")

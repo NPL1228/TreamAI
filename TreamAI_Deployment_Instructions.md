@@ -59,7 +59,7 @@ SMTP_PASSWORD=your_app_password
 ### Run backend (persistent):
 ```bash
 screen -S treamai
-uvicorn main:app --host 0.0.0.0 --port 8000 \
+python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 \
   --ssl-keyfile private.key \
   --ssl-certfile cert.pem
 # Detach: Ctrl+A then D

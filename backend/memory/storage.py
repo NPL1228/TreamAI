@@ -104,6 +104,46 @@ def get_connection():
     return sqlite3.connect(DB_PATH)
 
 
+def update_username(old_name: str, new_name: str) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE Users SET username = ? WHERE username = ?", (new_name, old_name))
+        cursor.execute("UPDATE Chat_Members SET user_name = ? WHERE user_name = ?", (new_name, old_name))
+        cursor.execute("UPDATE Friendships SET user1 = ? WHERE user1 = ?", (new_name, old_name))
+        cursor.execute("UPDATE Friendships SET user2 = ? WHERE user2 = ?", (new_name, old_name))
+        cursor.execute("UPDATE Message_Buffer SET user_name = ? WHERE user_name = ?", (new_name, old_name))
+        cursor.execute("UPDATE Messages SET sender = ? WHERE sender = ?", (new_name, old_name))
+        cursor.execute("UPDATE Notifications SET username = ? WHERE username = ?", (new_name, old_name))
+        cursor.execute("UPDATE Chats SET chat_name = REPLACE(chat_name, 'Chat with ' || ?, 'Chat with ' || ?) WHERE chat_type = 'private'", (old_name, new_name))
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+
+def register_user(username: str, email: str, password_hash: str) -> bool:
+    conn = get_connection()
+    try:
+        conn.execute("INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)", (username, email, password_hash))
+        
+        # Auto-generate a private chat with the TreamAI Agent
+        ai_chat_id = f"ai-{username}-{random.randint(1000, 9999)}"
+        conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, ?)", 
+                     (ai_chat_id, "TreamAI Agent", "private"))
+        conn.execute("INSERT INTO Chat_Members (chat_id, user_name) VALUES (?, ?)", 
+                     (ai_chat_id, username))
+                     
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+
 def register_chat(chat_id: str, chat_name: str, chat_type: str):
     conn = get_connection()
     conn.execute("""
@@ -293,8 +333,25 @@ def get_user_chats(username: str) -> list:
         ORDER BY c.last_activity DESC
     """, (username,))
     rows = cursor.fetchall()
+    
+    chats = []
+    for r in rows:
+        chat_id = r[0]
+        chat_name = r[1]
+        chat_type = r[2]
+        last_activity = r[3]
+        
+        if chat_type == 'private' and chat_name != 'TreamAI Agent':
+            # find the other member
+            cursor.execute("SELECT user_name FROM Chat_Members WHERE chat_id = ? AND user_name != ?", (chat_id, username))
+            other = cursor.fetchone()
+            if other:
+                chat_name = other[0]
+                
+        chats.append({"chat_id": chat_id, "chat_name": chat_name, "chat_type": chat_type, "last_activity": last_activity})
+        
     conn.close()
-    return [{"chat_id": r[0], "chat_name": r[1], "chat_type": r[2], "last_activity": r[3]} for r in rows]
+    return chats
 
 def update_chat_activity(chat_id: str):
     conn = get_connection()

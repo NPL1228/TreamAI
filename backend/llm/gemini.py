@@ -95,9 +95,9 @@ Return ONLY JSON.
         "suggested_name": None
     }
 
-def generate_response(query: str, nodes: list) -> str:
+def generate_response(query: str, nodes: list, chat_history: list = None) -> str:
     """
-    Generate a response to the user's query using retrieved memory nodes.
+    Generate a response to the user's query using retrieved memory nodes and chat history.
     Also cites which nodes were used.
     """
     client = get_client()
@@ -106,16 +106,24 @@ def generate_response(query: str, nodes: list) -> str:
     for node in nodes:
         context_text += f"- [ID: {node['id']}] ({node['type']}): {node['content']}\n"
         
+    history_text = ""
+    if chat_history:
+        history_text = "Recent Conversation History:\n" + "\n".join(
+            f"[{m['sender']}]: {m['text']}" for m in chat_history
+        )
+        
     prompt = f"""
-    You are a helpful AI assistant.
+    You are TreamAI, a helpful AI assistant.
+    
+    {history_text}
     
     Context Memories:
     {context_text}
     
     User Query: {query}
     
-    Generate a response using the context provided.
-    At the very end of your response, on a new line, you MUST list the exact memory IDs you used to form your response in this format:
+    Generate a conversational response using the context and history provided.
+    At the very end of your response, on a new line, you MUST list the exact memory IDs you used from Context Memories in this format:
     USED: [id1, id2]
     """
     

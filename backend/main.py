@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from memory.storage import init_db, register_user, authenticate_user, get_user_by_email, store_reset_token, validate_reset_token, update_password, get_user_chats, get_chat, create_chat, join_chat, send_friend_request, accept_friend_request, get_pending_requests, get_friends, update_chat_activity, get_chat_info, update_chat_description, save_message, get_chat_history, create_notification, get_notifications, mark_notifications_read, update_ai_listening
+from memory.storage import init_db, register_user, authenticate_user, get_user_by_email, store_reset_token, validate_reset_token, update_password, get_user_chats, get_chat, create_chat, join_chat, send_friend_request, accept_friend_request, get_pending_requests, get_friends, update_chat_activity, get_chat_info, update_chat_description, save_message, get_chat_history, create_notification, get_notifications, mark_notifications_read, update_ai_listening, update_username
 from bot import handle_message
 import json
 import hashlib
@@ -182,6 +182,17 @@ async def login(req: AuthRequest):
     if authenticate_user(req.username, pwd_hash):
         return {"status": "success", "username": req.username}
     raise HTTPException(status_code=401, detail="Invalid credentials")
+
+from pydantic import BaseModel
+class UpdateUsernameRequest(BaseModel):
+    old_username: str
+    new_username: str
+
+@app.post("/api/users/update_username")
+async def api_update_username(req: UpdateUsernameRequest):
+    if update_username(req.old_username, req.new_username):
+        return {"status": "success", "username": req.new_username}
+    raise HTTPException(status_code=400, detail="Username already exists or could not be updated")
 
 @app.post("/forgot-password")
 async def forgot_password(req: ForgotPasswordRequest):
