@@ -55,6 +55,7 @@ def init_db():
             user_name   TEXT,
             role        TEXT DEFAULT 'member',
             joined_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_read   TIMESTAMP,
             PRIMARY KEY (chat_id, user_name)
         );
 
@@ -95,6 +96,13 @@ def init_db():
             created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
+
+    # Auto-migrate schema for existing databases
+    try:
+        cursor.execute("ALTER TABLE Chat_Members ADD COLUMN last_read TIMESTAMP")
+        cursor.execute("UPDATE Chat_Members SET last_read = CURRENT_TIMESTAMP")
+    except sqlite3.OperationalError:
+        pass # Column already exists
 
     conn.commit()
     conn.close()
