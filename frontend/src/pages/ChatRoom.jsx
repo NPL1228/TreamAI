@@ -168,7 +168,9 @@ export default function ChatRoom({ user }) {
                   color: 'white',
                   borderBottomRightRadius: isMe ? '4px' : '16px',
                   borderBottomLeftRadius: !isMe ? '4px' : '16px',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap'
                 }}>
                   {msg.text}
                 </div>

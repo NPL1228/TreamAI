@@ -144,11 +144,11 @@ export default function FriendsList({ user }) {
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {filteredFriends.map((f, i) => (
             <div key={i} style={{ padding: '15px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <Users size={20} color="var(--text-muted)" />
-                <span style={{ fontSize: '1.1rem' }}>{f.username}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1, minWidth: 0, marginRight: '15px' }}>
+                <Users size={20} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.username}</span>
               </div>
-              <button onClick={() => handleChatNow(f.username)} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
+              <button onClick={() => handleChatNow(f.username)} style={{ flexShrink: 0, background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
                 Chat Now
               </button>
             </div>

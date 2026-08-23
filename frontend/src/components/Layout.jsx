@@ -183,7 +183,7 @@ export default function Layout({ user, onLogout, children }) {
                 ))}
                 {friends.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>No friends yet.</p>}
                 {friends.length > 3 && (
-                  <Link to="/friends" style={{ fontSize: '0.8rem', color: 'var(--primary)', textDecoration: 'none', marginTop: '5px' }}>Show More...</Link>
+                  <span onClick={() => handleNavigate('/friends')} style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', marginTop: '5px' }}>Show More...</span>
                 )}
               </div>
             </div>
@@ -213,7 +213,7 @@ export default function Layout({ user, onLogout, children }) {
                   </div>
                 ))}
                 {privateChats.length > 4 && (
-                  <Link to="/chats/private" style={{ fontSize: '0.8rem', color: 'var(--primary)', textDecoration: 'none', marginTop: '5px' }}>Show More...</Link>
+                  <span onClick={() => handleNavigate('/chats/private')} style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', marginTop: '5px' }}>Show More...</span>
                 )}
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function Layout({ user, onLogout, children }) {
                 ))}
                 {teamChats.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>No teams yet.</p>}
                 {teamChats.length > 3 && (
-                  <Link to="/chats/team" style={{ fontSize: '0.8rem', color: 'var(--primary)', textDecoration: 'none', marginTop: '5px' }}>Show More...</Link>
+                  <span onClick={() => handleNavigate('/chats/team')} style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', marginTop: '5px' }}>Show More...</span>
                 )}
               </div>
             </div>
