@@ -15,6 +15,14 @@ export default function ChatInfo({ user }) {
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     document.title = `Chat Info | TreamAI`;
     fetchChatInfo();
@@ -25,9 +33,14 @@ export default function ChatInfo({ user }) {
       const res = await fetch(`${baseUrl}/api/chats/info/${chatId}`);
       if (res.ok) {
         const data = await res.json();
-        setChatInfo(data.info);
-        setEditDescValue(data.info.description || '');
-        setAiListening(data.info.ai_listening !== false); // default to true if undefined
+        let info = data.info;
+        if (info.chat_type === 'private' && info.chat_name !== 'TreamAI Agent' && info.members) {
+          const other = info.members.find(m => m.username !== user);
+          if (other) info.chat_name = other.username;
+        }
+        setChatInfo(info);
+        setEditDescValue(info.description || '');
+        setAiListening(info.ai_listening !== false); // default to true if undefined
       }
     } catch (err) {
       console.error("Failed to fetch chat info", err);
@@ -82,39 +95,40 @@ export default function ChatInfo({ user }) {
   if (!chatInfo) return <div style={{ padding: '40px', color: 'white' }}>Chat not found</div>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '40px', maxWidth: '800px', margin: '0 auto', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '60px 20px 20px 20px' : '40px', maxWidth: '800px', margin: '0 auto', height: '100%', overflowY: 'auto' }}>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
           <ArrowLeft size={24} />
         </button>
-        <h1 style={{ fontSize: '2rem', margin: 0 }}>Chat Information</h1>
+        <h1 style={{ fontSize: isMobile ? '1.3rem' : '1.5rem', margin: 0 }}>Chat Information</h1>
       </div>
 
-      <div className="animate-fade-in" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '30px' }}>
+      <div className="animate-fade-in" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
         {/* Basic Info Section */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '30px', borderRadius: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-            <div style={{ background: 'rgba(99, 102, 241, 0.15)', padding: '15px', borderRadius: '50%', color: 'var(--primary)' }}>
-              <Info size={32} />
-            </div>
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ fontSize: '1.8rem', margin: 0, fontWeight: 'bold' }}>{chatInfo.chat_name}</h2>
+        <div style={{ background: 'rgba(255,255,255,0.03)', padding: isMobile ? '20px' : '30px', borderRadius: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: '15px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', width: '100%' }}>
+              <div style={{ background: 'rgba(99, 102, 241, 0.15)', padding: '15px', borderRadius: '50%', color: 'var(--primary)' }}>
+                <Info size={28} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h2 style={{ fontSize: isMobile ? '1.4rem' : '1.8rem', margin: 0, fontWeight: 'bold', wordBreak: 'break-word' }}>{chatInfo.chat_name}</h2>
                 <p style={{ color: 'var(--text-muted)', margin: '5px 0 0 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <Hash size={14} /> Code: <span style={{ color: 'white', fontWeight: 'bold', letterSpacing: '1px' }}>{chatInfo.chat_id}</span>
                 </p>
               </div>
-              <button 
-                onClick={handleCopy}
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: copied ? '#10b981' : 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s' }}
-                className="hover-bg"
-              >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                <span>{copied ? 'Copied' : 'Copy Code'}</span>
-              </button>
             </div>
+            
+            <button 
+              onClick={handleCopy}
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: copied ? '#10b981' : 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s', alignSelf: isMobile ? 'flex-start' : 'auto', marginTop: isMobile ? '10px' : '0' }}
+              className="hover-bg"
+            >
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+              <span>{copied ? 'Copied' : 'Copy Code'}</span>
+            </button>
           </div>
           
           <div style={{ marginTop: '30px' }}>
@@ -165,7 +179,7 @@ export default function ChatInfo({ user }) {
             <div 
               onClick={handleToggleAI}
               style={{ 
-                width: '50px', 
+                width: '80px', 
                 height: '26px', 
                 background: aiListening ? 'var(--primary)' : 'rgba(255,255,255,0.1)', 
                 borderRadius: '13px',
@@ -181,7 +195,7 @@ export default function ChatInfo({ user }) {
                 borderRadius: '50%',
                 position: 'absolute',
                 top: '2px',
-                left: aiListening ? '26px' : '2px',
+                left: aiListening ? '20px' : '2px',
                 transition: 'all 0.3s'
               }} />
             </div>

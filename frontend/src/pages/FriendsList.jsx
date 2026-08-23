@@ -69,6 +69,19 @@ export default function FriendsList({ user }) {
     }
   };
 
+  const handleChatNow = async (friendUsername) => {
+    try {
+      const res = await fetch(`${baseUrl}/api/chats/${user}`);
+      if (res.ok) {
+        const data = await res.json();
+        const chat = data.chats.find(c => c.chat_type === 'private' && c.chat_name === friendUsername);
+        if (chat) navigate(`/chat/${chat.chat_id}`);
+      }
+    } catch (err) {
+      console.error("Failed to fetch chats to navigate", err);
+    }
+  };
+
   const filteredFriends = friends.filter(f => f.username.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -130,9 +143,14 @@ export default function FriendsList({ user }) {
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {filteredFriends.map((f, i) => (
-            <div key={i} style={{ padding: '15px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(255, 255, 255, 0.05)' }}>
-              <Users size={20} color="var(--text-muted)" />
-              <span style={{ fontSize: '1.1rem' }}>{f.username}</span>
+            <div key={i} style={{ padding: '15px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <Users size={20} color="var(--text-muted)" />
+                <span style={{ fontSize: '1.1rem' }}>{f.username}</span>
+              </div>
+              <button onClick={() => handleChatNow(f.username)} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                Chat Now
+              </button>
             </div>
           ))}
           {filteredFriends.length === 0 && (

@@ -11,6 +11,13 @@ export default function ChatRoom({ user }) {
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
   const [chatInfo, setChatInfo] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     document.title = chatInfo ? `${chatInfo.chat_name} | TreamAI` : `Chat: ${chatId} | TreamAI`;
@@ -23,14 +30,19 @@ export default function ChatRoom({ user }) {
         const res = await fetch(`${baseUrl}/api/chats/info/${chatId}`);
         if (res.ok) {
           const data = await res.json();
-          setChatInfo(data.info);
+          let info = data.info;
+          if (info.chat_type === 'private' && info.chat_name !== 'TreamAI Agent' && info.members) {
+            const other = info.members.find(m => m.username !== user);
+            if (other) info.chat_name = other.username;
+          }
+          setChatInfo(info);
         }
       } catch (err) {
         console.error("Failed to fetch chat info", err);
       }
     };
     fetchChatInfo();
-  }, [chatId]);
+  }, [chatId, user]);
 
   useEffect(() => {
     const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8443';
@@ -81,15 +93,15 @@ export default function ChatRoom({ user }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '20px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
       
-      <header style={{ padding: '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>
+      <header style={{ padding: isMobile ? '60px 10px 15px 10px' : '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '20px' }}>
+          <button onClick={() => navigate('/dashboard')} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>
             <ArrowLeft size={24} />
           </button>
           <div>
-            <h2 style={{ fontSize: '1.4rem', margin: 0 }}>{chatInfo ? chatInfo.chat_name : `#${chatId}`}</h2>
+            <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.4rem', margin: 0, wordBreak: 'break-word', maxWidth: isMobile ? '180px' : 'auto' }}>{chatInfo ? chatInfo.chat_name : `#${chatId}`}</h2>
           </div>
         </div>
         <button 

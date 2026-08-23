@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { MessageSquare, Users, LogOut, Settings, Hash, Bell } from 'lucide-react';
 
@@ -23,6 +23,42 @@ export default function Layout({ user, onLogout, children }) {
   const [friends, setFriends] = useState([]);
   
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+
+  const [isPopupMounted, setIsPopupMounted] = useState(false);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const popupRef = useRef(null);
+
+  const closePopup = () => {
+    if (isPopupMounted) {
+      setIsPopupVisible(false);
+      setTimeout(() => setIsPopupMounted(false), 150);
+    }
+  };
+
+  const togglePopup = () => {
+    if (isPopupMounted) {
+      closePopup();
+    } else {
+      setIsPopupMounted(true);
+      setTimeout(() => setIsPopupVisible(true), 10);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target)) {
+        closePopup();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isPopupMounted]);
+
+  const handleNavigate = (path) => {
+    navigate(path);
+    if (isMobile) setIsSidebarOpen(false);
+    closePopup();
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -84,11 +120,11 @@ export default function Layout({ user, onLogout, children }) {
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           style={{
-            position: 'absolute',
-            bottom: '40px',
-            right: isSidebarOpen ? (isMobile ? '20px' : '-30px') : '-75px',
-            width: '60px',
-            height: '60px',
+            position: isMobile ? 'fixed' : 'absolute',
+            top: '20px',
+            right: isMobile ? '20px' : (isSidebarOpen ? '-23px' : '-75px'),
+            width: '45px',
+            height: '45px',
             borderRadius: '50%',
             background: '#191b21',
             border: '1px solid var(--border)',
@@ -96,9 +132,9 @@ export default function Layout({ user, onLogout, children }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 20,
+            zIndex: 50,
             boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-            transition: 'right 0.3s ease'
+            transition: isMobile ? 'none' : 'right 0.3s ease'
           }}
         >
           <div style={{
@@ -108,9 +144,9 @@ export default function Layout({ user, onLogout, children }) {
             transition: 'transform 0.4s ease',
             transform: isSidebarOpen ? 'rotate(90deg)' : 'rotate(0deg)'
           }}>
-            <div style={{ width: '25px', height: '4px', background: 'var(--text-main)', borderRadius: '2px', transition: 'all 0.3s ease' }} />
-            <div style={{ width: '25px', height: '4px', background: 'var(--text-main)', borderRadius: '2px', transition: 'all 0.3s ease' }} />
-            <div style={{ width: '25px', height: '4px', background: 'var(--text-main)', borderRadius: '2px', transition: 'all 0.3s ease' }} />
+            <div style={{ width: '20px', height: '3px', background: 'var(--text-main)', borderRadius: '2px', transition: 'all 0.3s ease' }} />
+            <div style={{ width: '20px', height: '3px', background: 'var(--text-main)', borderRadius: '2px', transition: 'all 0.3s ease' }} />
+            <div style={{ width: '20px', height: '3px', background: 'var(--text-main)', borderRadius: '2px', transition: 'all 0.3s ease' }} />
           </div>
         </button>
 
@@ -127,8 +163,9 @@ export default function Layout({ user, onLogout, children }) {
         }}>
         
           <div style={{ padding: '0 20px', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--primary)', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>TreamAI</h2>
-            <p style={{ margin: '5px 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user}</p>
+            <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={() => handleNavigate('/dashboard')}>
+              TreamAI
+            </h2>
           </div>
 
           {/* Scrollable Lists */}
@@ -158,7 +195,7 @@ export default function Layout({ user, onLogout, children }) {
                 {displayPrivateChats.map(chat => (
                   <div 
                     key={chat.chat_id}
-                    onClick={() => navigate(`/chat/${chat.chat_id}`)}
+                    onClick={() => handleNavigate(`/chat/${chat.chat_id}`)}
                     style={{ 
                       padding: '8px 12px', 
                       borderRadius: '8px', 
@@ -188,7 +225,7 @@ export default function Layout({ user, onLogout, children }) {
                 {displayTeamChats.map(chat => (
                   <div 
                     key={chat.chat_id}
-                    onClick={() => navigate(`/chat/${chat.chat_id}`)}
+                    onClick={() => handleNavigate(`/chat/${chat.chat_id}`)}
                     style={{ padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255, 255, 255, 0.05)' }}
                     className="hover-bg"
                   >
@@ -205,24 +242,57 @@ export default function Layout({ user, onLogout, children }) {
 
           </div>
 
-          {/* Footer Actions */}
-          <div style={{ padding: '20px 20px 0 20px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button onClick={() => navigate('/notifications')} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '8px 0', fontSize: '0.95rem' }}>
-              <Bell size={18} /> Notifications
-            </button>
-            <button onClick={() => navigate('/settings')} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '8px 0', fontSize: '0.95rem' }}>
-              <Settings size={18} /> Settings
-            </button>
-            <button onClick={onLogout} style={{ background: 'transparent', border: 'none', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '8px 0', fontSize: '0.95rem' }}>
-              <LogOut size={18} /> Logout
-            </button>
+          {/* Footer Actions (Popup) */}
+          <div ref={popupRef} style={{ position: 'relative', padding: '5px', borderTop: '1px solid var(--border)', marginTop: 'auto', marginBottom: '-15px' }}>
+            {isPopupMounted && (
+              <div style={{ 
+                position: 'absolute', bottom: '70px', left: '20px', right: '20px', 
+                background: '#1f2229', border: '1px solid var(--border)', 
+                borderRadius: '12px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '5px', 
+                zIndex: 30, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', 
+                opacity: isPopupVisible ? 1 : 0,
+                transform: isPopupVisible ? 'translateY(0)' : 'translateY(10px)',
+                transition: 'opacity 0.15s ease-out, transform 0.15s ease-out',
+                pointerEvents: isPopupVisible ? 'auto' : 'none'
+              }}>
+                <button onClick={() => { closePopup(); handleNavigate('/notifications'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', fontSize: '0.95rem', borderRadius: '8px' }} className="hover-bg">
+                  <Bell size={18} /> Notifications
+                </button>
+                <button onClick={() => { closePopup(); handleNavigate('/settings'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', fontSize: '0.95rem', borderRadius: '8px' }} className="hover-bg">
+                  <Settings size={18} /> Settings
+                </button>
+                <button onClick={() => { closePopup(); onLogout(); }} style={{ background: 'transparent', border: 'none', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', fontSize: '0.95rem', borderRadius: '8px' }} className="hover-bg">
+                  <LogOut size={18} /> Logout
+                </button>
+              </div>
+            )}
+            <div 
+              onClick={togglePopup} 
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '10px', borderRadius: '8px', background: isPopupMounted ? 'rgba(255,255,255,0.05)' : 'transparent' }}
+              className="hover-bg"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                  {user.charAt(0).toUpperCase()}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{user}</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>My Account</span>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div style={{ 
+        flex: 1, 
+        overflowY: 'auto',
+        paddingLeft: (isMobile || isSidebarOpen) ? '0px' : '80px',
+        transition: 'padding-left 0.3s ease'
+      }}>
         {children}
       </div>
 
