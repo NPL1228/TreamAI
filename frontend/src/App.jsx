@@ -54,7 +54,7 @@ function App() {
         />
         <Route 
           path="/settings" 
-          element={user ? <Layout user={user} onLogout={handleLogout}><Settings user={user} /></Layout> : <Navigate to="/login" />} 
+          element={user ? <Layout user={user} onLogout={handleLogout}><Settings user={user} onUserUpdate={setUser} /></Layout> : <Navigate to="/login" />} 
         />
         <Route 
           path="/notifications" 

@@ -172,7 +172,36 @@ export default function ChatRoom({ user }) {
                   wordBreak: 'break-word',
                   whiteSpace: 'pre-wrap'
                 }}>
-                  {msg.text}
+                  {(() => {
+                    const parts = msg.text.split(/(\[\[.*?\|.*?\]\])/g);
+                    return parts.map((part, i) => {
+                      const match = part.match(/\[\[(.*?)\|(.*?)\]\]/);
+                      if (match) {
+                        return (
+                          <button 
+                            key={i} 
+                            onClick={() => ws.current && ws.current.send(match[2])}
+                            className="hover-bg"
+                            style={{
+                              display: 'inline-block',
+                              margin: '4px',
+                              padding: '6px 12px',
+                              background: 'rgba(255,255,255,0.15)',
+                              border: '1px solid rgba(255,255,255,0.3)',
+                              borderRadius: '6px',
+                              color: 'white',
+                              cursor: 'pointer',
+                              fontSize: '0.85rem',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            {match[1]}
+                          </button>
+                        );
+                      }
+                      return <span key={i}>{part}</span>;
+                    });
+                  })()}
                 </div>
               </div>
             );
@@ -183,13 +212,32 @@ export default function ChatRoom({ user }) {
         {/* Input Area */}
         <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'transparent' }}>
           <form onSubmit={sendMessage} style={{ display: 'flex', gap: '10px' }}>
-            <input
-              type="text"
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(e);
+                }
+              }}
               placeholder="Message this chat... (use @agent to ask TreamAI)"
               className="input-field"
-              style={{ flex: 1, borderRadius: '24px', padding: '20px 25px', fontSize: '1.1rem' }}
+              rows={1}
+              style={{ 
+                flex: 1, 
+                borderRadius: '24px', 
+                padding: '16px 25px', 
+                fontSize: '1.1rem',
+                minHeight: '56px',
+                maxHeight: '120px',
+                resize: 'none',
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'inherit',
+                overflowY: 'auto',
+                lineHeight: '1.5'
+              }}
             />
             <button type="submit" className="btn-primary" style={{ borderRadius: '50%', width: '56px', height: '56px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Send size={24} style={{ marginLeft: '-2px' }} />

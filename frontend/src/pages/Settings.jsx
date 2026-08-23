@@ -1,13 +1,43 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Bell, Shield, Palette } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-export default function Settings({ user }) {
+export default function Settings({ user, onUserUpdate }) {
   const navigate = useNavigate();
+  const [newUsername, setNewUsername] = useState(user || '');
+  const [isEditing, setIsEditing] = useState(false);
+  const [status, setStatus] = useState({ type: '', msg: '' });
 
   useEffect(() => {
     document.title = 'Settings | TreamAI';
   }, []);
+
+  const handleUpdateUsername = async () => {
+    if (!newUsername.trim() || newUsername === user) {
+      setIsEditing(false);
+      return;
+    }
+    
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+      const res = await fetch(`${baseUrl}/api/users/update_username`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ old_username: user, new_username: newUsername.trim() })
+      });
+      if (res.ok) {
+        localStorage.setItem('treamai_user', newUsername.trim());
+        if (onUserUpdate) onUserUpdate(newUsername.trim());
+        setStatus({ type: 'success', msg: 'Username updated successfully!' });
+        setIsEditing(false);
+      } else {
+        const data = await res.json();
+        setStatus({ type: 'error', msg: data.detail || 'Failed to update username' });
+      }
+    } catch (err) {
+      setStatus({ type: 'error', msg: 'Server connection error' });
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
@@ -24,10 +54,29 @@ export default function Settings({ user }) {
           <User size={24} color="var(--primary)" />
           <h2 style={{ margin: 0 }}>Profile</h2>
         </div>
+        {status.msg && (
+          <div style={{ marginBottom: '15px', padding: '10px', borderRadius: '8px', background: status.type === 'error' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)', color: status.type === 'error' ? '#ef4444' : '#10b981' }}>
+            {status.msg}
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <div>
-            <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>Username</label>
-            <input type="text" className="input-field" value={user || ''} disabled style={{ opacity: 0.7 }} />
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '15px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>Username</label>
+              <input 
+                type="text" 
+                className="input-field" 
+                value={newUsername} 
+                onChange={(e) => setNewUsername(e.target.value)}
+                disabled={!isEditing}
+                style={{ opacity: isEditing ? 1 : 0.7 }}
+              />
+            </div>
+            {isEditing ? (
+              <button onClick={handleUpdateUsername} className="btn-primary" style={{ padding: '12px 20px', height: '48px' }}>Save</button>
+            ) : (
+              <button onClick={() => setIsEditing(true)} className="btn-primary" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', padding: '12px 20px', height: '48px' }}>Edit</button>
+            )}
           </div>
           <div>
             <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>Email</label>
