@@ -5,7 +5,18 @@ import { MessageSquare, Users, LogOut, Settings, Hash, Bell } from 'lucide-react
 export default function Layout({ user, onLogout, children }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) setIsSidebarOpen(true);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Data states
   const [chats, setChats] = useState([]);
@@ -59,7 +70,7 @@ export default function Layout({ user, onLogout, children }) {
       
       {/* Sidebar */}
       <div style={{ 
-        width: isSidebarOpen ? '280px' : '0px', 
+        width: isSidebarOpen ? (isMobile ? '100vw' : '280px') : '0px', 
         background: 'rgba(255, 255, 255, 0.03)', 
         borderRight: '1px solid var(--border)',
         display: 'flex', 
@@ -75,7 +86,7 @@ export default function Layout({ user, onLogout, children }) {
           style={{
             position: 'absolute',
             bottom: '40px',
-            right: isSidebarOpen ? '-30px' : '-75px',
+            right: isSidebarOpen ? (isMobile ? '20px' : '-30px') : '-75px',
             width: '60px',
             height: '60px',
             borderRadius: '50%',
@@ -104,7 +115,7 @@ export default function Layout({ user, onLogout, children }) {
         </button>
 
         <div style={{
-          width: '280px',
+          width: isSidebarOpen ? (isMobile ? '100vw' : '280px') : '280px',
           display: 'flex',
           flexDirection: 'column',
           height: '100%',

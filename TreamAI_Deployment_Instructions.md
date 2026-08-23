@@ -17,7 +17,7 @@ TreamAI/
 4. Framework: Vite
 5. Add environment variables:
    ```
-   VITE_WS_URL  = wss://YOUR_ORACLE_IP:8000/ws
+   VITE_WS_URL  = wss://YOUR_ORACLE_IP:8000
    VITE_API_URL = https://YOUR_ORACLE_IP:8000
    ```
 6. Deploy → get `https://treamai.vercel.app`

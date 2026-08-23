@@ -7,6 +7,7 @@ export default function ChatRoom({ user }) {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
   const [chatInfo, setChatInfo] = useState(null);
@@ -36,6 +37,7 @@ export default function ChatRoom({ user }) {
     const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
     
     let isMounted = true;
+    setIsLoading(true);
 
     // Fetch message history first
     fetch(`${baseUrl}/api/chats/${chatId}/messages`)
@@ -44,6 +46,7 @@ export default function ChatRoom({ user }) {
         if (isMounted && data.messages) {
           setMessages(data.messages);
         }
+        if (isMounted) setIsLoading(false);
         
         // Then establish WebSocket connection for live messages
         if (isMounted) {
@@ -54,7 +57,10 @@ export default function ChatRoom({ user }) {
           };
         }
       })
-      .catch(err => console.error("Failed to load chat history", err));
+      .catch(err => {
+        console.error("Failed to load chat history", err);
+        if (isMounted) setIsLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -112,15 +118,23 @@ export default function ChatRoom({ user }) {
         
         {/* Messages Area */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {messages.length === 0 && (
+          {isLoading ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <div className="spinner" style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+              <p>Loading conversation...</p>
+              <style>{`
+                @keyframes spin {
+                  to { transform: rotate(360deg); }
+                }
+              `}</style>
+            </div>
+          ) : messages.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '50px' }}>
               <Bot size={48} style={{ opacity: 0.5, marginBottom: '15px' }} />
               <h3>Welcome to #{chatInfo ? chatInfo.chat_name : `#${chatId}`}</h3>
               <p>Ready to collaborate? Send your first message to get started.</p>
             </div>
-          )}
-          
-          {messages.map((msg, idx) => {
+          ) : messages.map((msg, idx) => {
             const isMe = msg.sender === user;
             const isAgent = msg.sender === 'TreamAI Agent';
 
