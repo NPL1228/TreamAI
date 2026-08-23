@@ -435,6 +435,20 @@ def get_friends(username: str) -> list:
     conn.close()
     return [{"username": r[0], "created_at": r[1]} for r in rows]
 
+def remove_friend(user1: str, user2: str) -> bool:
+    conn = get_connection()
+    try:
+        conn.execute("""
+            DELETE FROM Friendships
+            WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?)
+        """, (user1, user2, user2, user1))
+        conn.commit()
+        return True
+    except Exception:
+        return False
+    finally:
+        conn.close()
+
 def get_private_chat_id(user1: str, user2: str):
     conn = get_connection()
     cursor = conn.cursor()

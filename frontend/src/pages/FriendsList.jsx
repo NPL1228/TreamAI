@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Users, UserPlus, Check } from 'lucide-react';
+import { ArrowLeft, Search, Users, UserPlus, Check, MoreVertical, MessageSquare, Trash2, X } from 'lucide-react';
 
 export default function FriendsList({ user }) {
   const navigate = useNavigate();
@@ -10,6 +10,9 @@ export default function FriendsList({ user }) {
   
   const [friendUsername, setFriendUsername] = useState('');
   const [friendStatus, setFriendStatus] = useState('');
+  
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [confirmRemove, setConfirmRemove] = useState(null);
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
@@ -82,6 +85,30 @@ export default function FriendsList({ user }) {
     }
   };
 
+  const handleRemoveFriend = async (friendUsername) => {
+    try {
+      const res = await fetch(`${baseUrl}/api/friends/remove`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user1: user, user2: friendUsername })
+      });
+      if (res.ok) {
+        setConfirmRemove(null);
+        setActiveMenu(null);
+        fetchData();
+        window.dispatchEvent(new Event('sidebar-update'));
+      }
+    } catch (err) {
+      console.error("Failed to remove friend", err);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenu(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const filteredFriends = friends.filter(f => f.username.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -148,9 +175,32 @@ export default function FriendsList({ user }) {
                 <Users size={20} color="var(--text-muted)" style={{ flexShrink: 0 }} />
                 <span style={{ fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.username}</span>
               </div>
-              <button onClick={() => handleChatNow(f.username)} style={{ flexShrink: 0, background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
-                Chat Now
-              </button>
+              <div style={{ position: 'relative' }}>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === f.username ? null : f.username); }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '5px' }}
+                >
+                  <MoreVertical size={20} />
+                </button>
+                {activeMenu === f.username && (
+                  <div style={{ position: 'absolute', right: 0, top: '35px', background: '#1f2229', border: '1px solid var(--border)', borderRadius: '8px', padding: '5px', zIndex: 10, width: '150px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleChatNow(f.username); }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: 'white', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                      className="hover-bg"
+                    >
+                      <MessageSquare size={16} /> Chat Now
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setConfirmRemove(f.username); setActiveMenu(null); }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#ef4444', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                      className="hover-bg"
+                    >
+                      <Trash2 size={16} /> Remove
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
           {filteredFriends.length === 0 && (
@@ -158,6 +208,24 @@ export default function FriendsList({ user }) {
           )}
         </div>
       </div>
+
+      {confirmRemove && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div className="glass-panel animate-fade-in" style={{ padding: '30px', maxWidth: '400px', width: '90%', position: 'relative' }}>
+            <button onClick={() => setConfirmRemove(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+            <h2 style={{ margin: '0 0 15px 0', fontSize: '1.4rem' }}>Remove Friend?</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '25px', lineHeight: '1.5' }}>
+              Are you sure you want to remove <strong>{confirmRemove}</strong> from your friends list?
+            </p>
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmRemove(null)} style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => handleRemoveFriend(confirmRemove)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Remove</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, MessageSquare, Hash } from 'lucide-react';
 
@@ -6,13 +6,11 @@ export default function ChatList({ user, type }) {
   const navigate = useNavigate();
   const [chats, setChats] = useState([]);
   const [search, setSearch] = useState('');
+  
+  const globalWs = useRef(null);
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
-
-  useEffect(() => {
-    document.title = type === 'private' ? 'Private Chats | TreamAI' : 'Team Chats | TreamAI';
-    fetchChats();
-  }, [user, type]);
+  const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8443';
 
   const fetchChats = async () => {
     try {
@@ -26,6 +24,25 @@ export default function ChatList({ user, type }) {
       console.error("Failed to fetch chats", err);
     }
   };
+
+  useEffect(() => {
+    document.title = type === 'private' ? 'Private Chats | TreamAI' : 'Team Chats | TreamAI';
+    fetchChats();
+
+    globalWs.current = new WebSocket(`${wsUrl}/ws/global/${user}`);
+    globalWs.current.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'new_message' || msg.type === 'new_notification') {
+          fetchChats();
+        }
+      } catch (e) {}
+    };
+
+    return () => {
+      if (globalWs.current) globalWs.current.close();
+    };
+  }, [user, type, baseUrl, wsUrl]);
 
   const filteredChats = chats.filter(c => c.chat_name.toLowerCase().includes(search.toLowerCase()));
   
@@ -101,8 +118,15 @@ export default function ChatList({ user, type }) {
                 )}
                 <span style={{ fontSize: '1.1rem', fontWeight: chat.chat_name === 'TreamAI Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
               </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                {formatTimeAgo(chat.last_activity)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
+                {chat.unread > 0 && (
+                  <div style={{ background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold', padding: '0 6px' }}>
+                    {chat.unread > 99 ? '99+' : chat.unread}
+                  </div>
+                )}
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  {formatTimeAgo(chat.last_activity)}
+                </div>
               </div>
             </div>
           ))}
