@@ -20,13 +20,15 @@ export default function Layout({ user, onLogout, children }) {
   
   // Data states
   const [chats, setChats] = useState([]);
-  const [friends, setFriends] = useState([]);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
   
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+  const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8443';
 
   const [isPopupMounted, setIsPopupMounted] = useState(false);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const popupRef = useRef(null);
+  const globalWs = useRef(null);
 
   const closePopup = () => {
     if (isPopupMounted) {
@@ -65,18 +67,15 @@ export default function Layout({ user, onLogout, children }) {
     
     const fetchData = async () => {
       try {
-        const [chatsRes, friendsRes] = await Promise.all([
-          fetch(`${baseUrl}/api/chats/${user}`),
-          fetch(`${baseUrl}/api/friends/${user}`)
-        ]);
-        
+        const chatsRes = await fetch(`${baseUrl}/api/chats/${user}`);
         if (chatsRes.ok) {
           const data = await chatsRes.json();
           setChats(data.chats);
         }
-        if (friendsRes.ok) {
-          const data = await friendsRes.json();
-          setFriends(data.friends);
+        const notifsRes = await fetch(`${baseUrl}/api/notifications/unread/${user}`);
+        if (notifsRes.ok) {
+          const data = await notifsRes.json();
+          setUnreadNotifs(data.unread);
         }
       } catch (err) {
         console.error("Failed to fetch sidebar data", err);
@@ -85,11 +84,25 @@ export default function Layout({ user, onLogout, children }) {
     
     fetchData();
 
+    // Setup global websocket for real-time updates
+    globalWs.current = new WebSocket(`${wsUrl}/ws/global/${user}`);
+    globalWs.current.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'new_message' || msg.type === 'new_notification') {
+          fetchData(); // Just refresh the data to get latest unread counts & sort order
+        }
+      } catch (e) {}
+    };
+
     // Listen for manual trigger events from other components
     const handleUpdate = () => fetchData();
     window.addEventListener('sidebar-update', handleUpdate);
-    return () => window.removeEventListener('sidebar-update', handleUpdate);
-  }, [user, baseUrl, location.pathname]);
+    return () => {
+      window.removeEventListener('sidebar-update', handleUpdate);
+      if (globalWs.current) globalWs.current.close();
+    };
+  }, [user, baseUrl, wsUrl, location.pathname]);
 
   const teamChats = chats.filter(c => c.chat_type === 'team');
   const privateChats = chats.filter(c => c.chat_type === 'private');
@@ -99,7 +112,6 @@ export default function Layout({ user, onLogout, children }) {
   const displayPrivateChats = agentChat ? [agentChat, ...otherPrivateChats] : otherPrivateChats.slice(0, 4);
 
   const displayTeamChats = teamChats.slice(0, 3);
-  const displayFriends = friends.slice(0, 3);
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
@@ -171,23 +183,6 @@ export default function Layout({ user, onLogout, children }) {
           {/* Scrollable Lists */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
             
-            {/* Friends Section */}
-            <div>
-              <h3 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px', letterSpacing: '0.5px' }}>Friends (Most Recent)</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {displayFriends.map((f, i) => (
-                  <div key={i} style={{ padding: '8px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255, 255, 255, 0.03)' }}>
-                    <Users size={16} color="var(--text-muted)" />
-                    <span style={{ fontSize: '0.95rem' }}>{f.username}</span>
-                  </div>
-                ))}
-                {friends.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>No friends yet.</p>}
-                {friends.length > 3 && (
-                  <span onClick={() => handleNavigate('/friends')} style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', marginTop: '5px' }}>Show More...</span>
-                )}
-              </div>
-            </div>
-
             {/* Private Chats Section */}
             <div>
               <h3 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px', letterSpacing: '0.5px' }}>Private Chats</h3>
@@ -199,17 +194,23 @@ export default function Layout({ user, onLogout, children }) {
                     style={{ 
                       padding: '8px 12px', 
                       borderRadius: '8px', 
-                      cursor: 'pointer', 
+                      cursor: 'pointer',
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: '10px', 
-                      background: chat.chat_name === 'TreamAI Agent' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                      border: chat.chat_name === 'TreamAI Agent' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent'
+                      gap: '10px',
+                      background: location.pathname === `/chat/${chat.chat_id}` ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                      color: location.pathname === `/chat/${chat.chat_id}` ? 'white' : 'var(--text-main)',
+                      position: 'relative'
                     }}
                     className="hover-bg"
                   >
-                    <MessageSquare size={16} color={chat.chat_name === 'TreamAI Agent' ? 'var(--primary)' : 'var(--text-muted)'} />
+                    <MessageSquare size={16} color={location.pathname === `/chat/${chat.chat_id}` ? "var(--primary)" : "var(--text-muted)"} />
                     <span style={{ fontSize: '0.95rem', fontWeight: chat.chat_name === 'TreamAI Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
+                    {chat.unread > 0 && (
+                      <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
+                        {chat.unread > 99 ? '99+' : chat.unread}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {privateChats.length > 4 && (
@@ -226,11 +227,26 @@ export default function Layout({ user, onLogout, children }) {
                   <div 
                     key={chat.chat_id}
                     onClick={() => handleNavigate(`/chat/${chat.chat_id}`)}
-                    style={{ padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255, 255, 255, 0.05)' }}
+                    style={{ 
+                      padding: '8px 12px', 
+                      borderRadius: '8px', 
+                      cursor: 'pointer',
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '10px',
+                      background: location.pathname === `/chat/${chat.chat_id}` ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                      color: location.pathname === `/chat/${chat.chat_id}` ? 'white' : 'var(--text-main)',
+                      position: 'relative'
+                    }}
                     className="hover-bg"
                   >
-                    <Hash size={16} color="var(--text-muted)" />
+                    <Hash size={16} color={location.pathname === `/chat/${chat.chat_id}` ? "var(--primary)" : "var(--text-muted)"} />
                     <span style={{ fontSize: '0.95rem' }}>{chat.chat_name}</span>
+                    {chat.unread > 0 && (
+                      <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
+                        {chat.unread > 99 ? '99+' : chat.unread}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {teamChats.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>No teams yet.</p>}
@@ -255,8 +271,18 @@ export default function Layout({ user, onLogout, children }) {
                 transition: 'opacity 0.15s ease-out, transform 0.15s ease-out',
                 pointerEvents: isPopupVisible ? 'auto' : 'none'
               }}>
-                <button onClick={() => { closePopup(); handleNavigate('/notifications'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', fontSize: '0.95rem', borderRadius: '8px' }} className="hover-bg">
-                  <Bell size={18} /> Notifications
+                <button onClick={() => { closePopup(); handleNavigate('/friends'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', fontSize: '0.95rem', borderRadius: '8px' }} className="hover-bg">
+                  <Users size={18} /> All Friends
+                </button>
+                <button onClick={() => { closePopup(); handleNavigate('/notifications'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '10px', fontSize: '0.95rem', borderRadius: '8px', width: '100%' }} className="hover-bg">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Bell size={18} /> Notifications
+                  </div>
+                  {unreadNotifs > 0 && (
+                    <div style={{ background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 'bold', padding: '0 4px' }}>
+                      {unreadNotifs > 99 ? '99+' : unreadNotifs}
+                    </div>
+                  )}
                 </button>
                 <button onClick={() => { closePopup(); handleNavigate('/settings'); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '10px', fontSize: '0.95rem', borderRadius: '8px' }} className="hover-bg">
                   <Settings size={18} /> Settings
@@ -268,12 +294,15 @@ export default function Layout({ user, onLogout, children }) {
             )}
             <div 
               onClick={togglePopup} 
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '10px', borderRadius: '8px', background: isPopupMounted ? 'rgba(255,255,255,0.05)' : 'transparent' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '10px', borderRadius: '8px', background: isPopupMounted ? 'rgba(255,255,255,0.05)' : 'transparent', position: 'relative' }}
               className="hover-bg"
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', position: 'relative' }}>
                   {user.charAt(0).toUpperCase()}
+                  {unreadNotifs > 0 && (
+                    <div style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#ef4444', border: '2px solid #191b21', borderRadius: '50%', width: '14px', height: '14px' }} />
+                  )}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{user}</span>

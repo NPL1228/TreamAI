@@ -12,6 +12,7 @@ export default function ChatRoom({ user }) {
   const messagesEndRef = useRef(null);
   const [chatInfo, setChatInfo] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isWaitingForAgent, setIsWaitingForAgent] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -60,12 +61,27 @@ export default function ChatRoom({ user }) {
         }
         if (isMounted) setIsLoading(false);
         
+        // Mark as read
+        fetch(`${baseUrl}/api/chats/${chatId}/read`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user })
+        }).then(() => window.dispatchEvent(new Event('sidebar-update')));
+        
         // Then establish WebSocket connection for live messages
         if (isMounted) {
           ws.current = new WebSocket(`${wsUrl}/ws/${chatId}/${user}`);
           ws.current.onmessage = (event) => {
             const msgData = JSON.parse(event.data);
             setMessages(prev => [...prev, msgData]);
+            if (msgData.sender === 'TreamAI Agent') {
+              setIsWaitingForAgent(false);
+            }
+            fetch(`${baseUrl}/api/chats/${chatId}/read`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: user })
+            });
           };
         }
       })
@@ -87,6 +103,13 @@ export default function ChatRoom({ user }) {
   const sendMessage = (e) => {
     e.preventDefault();
     if (!input.trim() || !ws.current) return;
+    
+    const isExpectingReply = (chatInfo?.chat_type === 'private' && chatInfo?.chat_name === 'TreamAI Agent') ||
+                             input.includes('@agent') || 
+                             input.startsWith('?');
+    if (isExpectingReply) {
+      setIsWaitingForAgent(true);
+    }
     
     ws.current.send(input);
     setInput('');
@@ -180,7 +203,13 @@ export default function ChatRoom({ user }) {
                         return (
                           <button 
                             key={i} 
-                            onClick={() => ws.current && ws.current.send(match[2])}
+                            onClick={() => {
+                              const action = match[2];
+                              if (action.includes('@agent') || action.startsWith('?')) {
+                                setIsWaitingForAgent(true);
+                              }
+                              ws.current && ws.current.send(action);
+                            }}
                             className="hover-bg"
                             style={{
                               display: 'inline-block',
@@ -206,6 +235,35 @@ export default function ChatRoom({ user }) {
               </div>
             );
           })}
+          
+          {isWaitingForAgent && (
+            <div style={{
+              alignSelf: 'flex-start',
+              maxWidth: '70%',
+              animation: 'fadeIn 0.3s ease'
+            }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', marginLeft: '4px', textAlign: 'left' }}>
+                TreamAI Agent
+              </div>
+              <div style={{
+                padding: '12px 18px',
+                borderRadius: '16px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid var(--secondary)',
+                color: 'white',
+                borderBottomLeftRadius: '4px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                display: 'flex',
+                gap: '4px',
+                alignItems: 'center'
+              }}>
+                <span className="dot-anim" style={{ animationDelay: '0s' }}>.</span>
+                <span className="dot-anim" style={{ animationDelay: '0.2s' }}>.</span>
+                <span className="dot-anim" style={{ animationDelay: '0.4s' }}>.</span>
+              </div>
+            </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
 

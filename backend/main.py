@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from memory.storage import init_db, register_user, authenticate_user, get_user_by_email, store_reset_token, validate_reset_token, update_password, get_user_chats, get_chat, create_chat, join_chat, send_friend_request, accept_friend_request, get_pending_requests, get_friends, update_chat_activity, get_chat_info, update_chat_description, save_message, get_chat_history, create_notification, get_notifications, mark_notifications_read, update_ai_listening, update_username
+from memory.storage import init_db, register_user, authenticate_user, get_user_by_email, store_reset_token, validate_reset_token, update_password, get_user_chats, get_chat, create_chat, join_chat, send_friend_request, accept_friend_request, get_pending_requests, get_friends, update_chat_activity, get_chat_info, update_chat_description, save_message, get_chat_history, create_notification, get_notifications, mark_notifications_read, update_ai_listening, update_username, mark_chat_read
 from bot import handle_message
 import json
 import hashlib
@@ -72,6 +72,8 @@ class ConnectionManager:
     def __init__(self):
         # Maps chat_id -> list of active WebSockets
         self.active_connections: dict[str, list[WebSocket]] = {}
+        # Maps username -> list of global WebSockets
+        self.global_connections: dict[str, list[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, chat_id: str):
         await websocket.accept()
@@ -85,10 +87,30 @@ class ConnectionManager:
             if not self.active_connections[chat_id]:
                 del self.active_connections[chat_id]
 
+    async def connect_global(self, websocket: WebSocket, username: str):
+        await websocket.accept()
+        if username not in self.global_connections:
+            self.global_connections[username] = []
+        self.global_connections[username].append(websocket)
+
+    def disconnect_global(self, websocket: WebSocket, username: str):
+        if username in self.global_connections:
+            self.global_connections[username].remove(websocket)
+            if not self.global_connections[username]:
+                del self.global_connections[username]
+
     async def broadcast(self, message: str, chat_id: str):
         if chat_id in self.active_connections:
             for connection in self.active_connections[chat_id]:
                 await connection.send_text(message)
+                
+    async def notify_user(self, username: str, payload: dict):
+        if username in self.global_connections:
+            for conn in self.global_connections[username]:
+                try:
+                    await conn.send_text(json.dumps(payload))
+                except Exception:
+                    pass
 
 manager = ConnectionManager()
 
@@ -258,6 +280,18 @@ async def api_get_chat_messages(chat_id: str):
     messages = get_chat_history(chat_id, limit=50)
     return {"status": "success", "messages": messages}
 
+@app.get("/api/notifications/unread/{username}")
+async def api_get_unread_notifications(username: str):
+    from memory.storage import get_connection
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM Notifications WHERE username = ? AND is_read = 0", (username,))
+    notifs = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM Friendships WHERE user2 = ? AND status = 'pending'", (username,))
+    friends = c.fetchone()[0]
+    conn.close()
+    return {"status": "success", "unread": notifs + friends}
+
 @app.get("/api/notifications/{username}")
 async def api_get_notifications(username: str):
     notifs = get_notifications(username)
@@ -271,6 +305,7 @@ async def api_mark_notifications_read(req: MarkReadReq):
 @app.post("/api/friends/request")
 async def api_friend_request(req: FriendReq):
     if send_friend_request(req.from_user, req.to_user):
+        await manager.notify_user(req.to_user, {"type": "new_notification"})
         return {"status": "success"}
     raise HTTPException(status_code=400, detail="Could not send request")
 
@@ -285,6 +320,20 @@ async def api_get_friends(username: str):
     friends = get_friends(username)
     pending = get_pending_requests(username)
     return {"status": "success", "friends": friends, "pending": pending}
+
+@app.post("/api/chats/{chat_id}/read")
+async def api_mark_chat_read(chat_id: str, req: MarkReadReq):
+    mark_chat_read(chat_id, req.username)
+    return {"status": "success"}
+
+@app.websocket("/ws/global/{username}")
+async def global_websocket_endpoint(websocket: WebSocket, username: str):
+    await manager.connect_global(websocket, username)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect_global(websocket, username)
 
 @app.websocket("/ws/{chat_id}/{username}")
 async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
@@ -301,6 +350,10 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
             # Update chat activity
             update_chat_activity(chat_id)
             
+            # Yield to event loop to ensure user message broadcasts before blocking LLM call
+            import asyncio
+            await asyncio.sleep(0.05)
+            
             # Send to TreamAI bot logic
             response = await handle_message(chat_id, text, username)
             
@@ -309,6 +362,17 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
                 save_message(chat_id, "TreamAI Agent", response)
                 agent_msg = json.dumps({"sender": "TreamAI Agent", "text": response})
                 await manager.broadcast(agent_msg, chat_id)
+                
+            # Send global notification to all members to update unread counts and sidebar ordering
+            try:
+                from memory.storage import get_chat_info
+                info = get_chat_info(chat_id)
+                if info and "members" in info:
+                    for m in info["members"]:
+                        if m["username"] != username:
+                            await manager.notify_user(m["username"], {"type": "new_message", "chat_id": chat_id})
+            except Exception as e:
+                print("Failed to send global notification:", e)
                 
     except WebSocketDisconnect:
         manager.disconnect(websocket, chat_id)

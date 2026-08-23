@@ -326,7 +326,10 @@ def get_user_chats(username: str) -> list:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT c.chat_id, c.chat_name, c.chat_type, c.last_activity
+        SELECT c.chat_id, c.chat_name, c.chat_type, c.last_activity,
+               (SELECT COUNT(*) FROM Messages m 
+                WHERE m.chat_id = c.chat_id 
+                AND m.timestamp > COALESCE(cm.last_read, '1970-01-01')) AS unread_count
         FROM Chats c
         JOIN Chat_Members cm ON c.chat_id = cm.chat_id
         WHERE cm.user_name = ?
@@ -340,6 +343,7 @@ def get_user_chats(username: str) -> list:
         chat_name = r[1]
         chat_type = r[2]
         last_activity = r[3]
+        unread = r[4]
         
         if chat_type == 'private' and chat_name != 'TreamAI Agent':
             # find the other member
@@ -348,10 +352,16 @@ def get_user_chats(username: str) -> list:
             if other:
                 chat_name = other[0]
                 
-        chats.append({"chat_id": chat_id, "chat_name": chat_name, "chat_type": chat_type, "last_activity": last_activity})
+        chats.append({"chat_id": chat_id, "chat_name": chat_name, "chat_type": chat_type, "last_activity": last_activity, "unread": unread})
         
     conn.close()
     return chats
+
+def mark_chat_read(chat_id: str, username: str):
+    conn = get_connection()
+    conn.execute("UPDATE Chat_Members SET last_read = CURRENT_TIMESTAMP WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+    conn.commit()
+    conn.close()
 
 def update_chat_activity(chat_id: str):
     conn = get_connection()

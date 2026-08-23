@@ -46,6 +46,7 @@ export default function Notifications({ user }) {
       });
       if (res.ok) {
         setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        window.dispatchEvent(new Event('sidebar-update'));
       }
     } catch (err) {
       console.error("Failed to mark read", err);
