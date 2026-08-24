@@ -5,12 +5,24 @@ import { useEffect, useState } from 'react';
 export default function Settings({ user, onUserUpdate }) {
   const navigate = useNavigate();
   const [newUsername, setNewUsername] = useState(user || '');
+  const [email, setEmail] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState({ type: '', msg: '' });
 
   useEffect(() => {
     document.title = 'Settings | TreamAI';
-  }, []);
+    if (user) {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+      fetch(`${baseUrl}/api/users/${user}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            setEmail(data.email);
+          }
+        })
+        .catch(err => console.error('Failed to fetch profile', err));
+    }
+  }, [user]);
 
   const handleUpdateUsername = async () => {
     if (!newUsername.trim() || newUsername === user) {
@@ -80,7 +92,7 @@ export default function Settings({ user, onUserUpdate }) {
           </div>
           <div>
             <label style={{ color: 'var(--text-muted)', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>Email</label>
-            <input type="email" className="input-field" placeholder="Stored securely in backend" disabled style={{ opacity: 0.7 }} />
+            <input type="email" className="input-field" value={email} placeholder="Loading..." disabled style={{ opacity: 0.7 }} />
           </div>
         </div>
       </div>
@@ -97,6 +109,12 @@ export default function Settings({ user, onUserUpdate }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
           <Shield size={24} color="#10b981" />
           <h2 style={{ margin: 0 }}>Security</h2>
+        </div>
+        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '15px', borderRadius: '8px', color: 'var(--text-main)', marginBottom: '20px' }}>
+          <strong>Yes, your passwords are encrypted!</strong>
+          <p style={{ margin: '5px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+            We use industry-standard SHA-256 cryptographic hashing before storing anything in our database. This means your raw password is never saved or visible to anyone.
+          </p>
         </div>
         <button onClick={() => navigate('/forgot-password')} className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}>
           Reset Password

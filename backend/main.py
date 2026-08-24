@@ -210,6 +210,18 @@ class UpdateUsernameRequest(BaseModel):
     old_username: str
     new_username: str
 
+@app.get("/api/users/{username}")
+async def get_user_profile(username: str):
+    from memory.storage import get_connection
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("SELECT email, created_at FROM Users WHERE username = ?", (username,))
+    row = c.fetchone()
+    conn.close()
+    if row:
+        return {"status": "success", "email": row[0], "created_at": row[1]}
+    raise HTTPException(status_code=404, detail="User not found")
+
 @app.post("/api/users/update_username")
 async def api_update_username(req: UpdateUsernameRequest):
     if update_username(req.old_username, req.new_username):

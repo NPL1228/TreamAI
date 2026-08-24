@@ -12,6 +12,7 @@ export default function FriendsList({ user }) {
   const [friendStatus, setFriendStatus] = useState('');
   
   const [activeMenu, setActiveMenu] = useState(null);
+  const [menuPosition, setMenuPosition] = useState('bottom');
   const [confirmRemove, setConfirmRemove] = useState(null);
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
@@ -177,13 +178,34 @@ export default function FriendsList({ user }) {
               </div>
               <div style={{ position: 'relative' }}>
                 <button 
-                  onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === f.username ? null : f.username); }}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    if (activeMenu === f.username) {
+                      setActiveMenu(null);
+                    } else {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const spaceBelow = window.innerHeight - rect.bottom;
+                      setMenuPosition(spaceBelow < 120 ? 'top' : 'bottom');
+                      setActiveMenu(f.username);
+                    }
+                  }}
                   style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '5px' }}
                 >
                   <MoreVertical size={20} />
                 </button>
                 {activeMenu === f.username && (
-                  <div style={{ position: 'absolute', right: 0, top: '35px', background: '#1f2229', border: '1px solid var(--border)', borderRadius: '8px', padding: '5px', zIndex: 10, width: '150px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                  <div className="animate-fade-in" style={{ 
+                    position: 'absolute', 
+                    right: 0, 
+                    ...(menuPosition === 'top' ? { bottom: '35px' } : { top: '35px' }),
+                    background: '#1f2229', 
+                    border: '1px solid var(--border)', 
+                    borderRadius: '8px', 
+                    padding: '5px', 
+                    zIndex: 10, 
+                    width: '150px', 
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)' 
+                  }}>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleChatNow(f.username); }}
                       style={{ width: '100%', background: 'transparent', border: 'none', color: 'white', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
