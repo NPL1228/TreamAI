@@ -73,6 +73,7 @@ export default function FriendsList({ user }) {
       if (res.ok) {
         setFriendStatus('Friend request sent!');
         setFriendUsername('');
+        fetchData();
       } else {
         setFriendStatus('Could not send request.');
       }
