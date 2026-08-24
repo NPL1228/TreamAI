@@ -19,8 +19,15 @@ export default function FriendsList({ user }) {
   const [menuPosition, setMenuPosition] = useState('bottom');
   const [confirmRemove, setConfirmRemove] = useState(null);
   const [isLoadingAction, setIsLoadingAction] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     document.title = 'Friends | TreamAI';
@@ -162,7 +169,7 @@ export default function FriendsList({ user }) {
   const filteredFriends = friends.filter(f => f.username.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '40px', maxWidth: '800px', margin: '0 auto', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: '40px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -171,36 +178,42 @@ export default function FriendsList({ user }) {
         <h1 style={{ fontSize: '2rem', margin: 0 }}>All Friends</h1>
       </div>
 
-      <div className="glass-panel animate-fade-in" style={{ padding: '30px', marginBottom: '20px' }}>
-        <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <UserPlus size={20} color="#10b981" /> Add a Friend
-        </h2>
-        <form onSubmit={handleSendFriendRequest} style={{ display: 'flex', gap: '10px' }}>
-          <input type="text" className="input-field" placeholder="Username" value={friendUsername} onChange={(e) => setFriendUsername(e.target.value)} required />
-          <button type="submit" className="btn-primary" style={{ background: '#10b981' }}>Add</button>
-        </form>
-        {friendStatus && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '8px' }}>{friendStatus}</p>}
-      </div>
-
-      {outgoingRequests.length > 0 && (
-        <div className="glass-panel animate-fade-in" style={{ padding: '30px', marginBottom: '20px', animationDelay: '0.15s' }}>
-          <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            Outgoing Requests
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {outgoingRequests.map((req, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '8px' }}>
-                <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>{req.username}</span>
-                <button disabled={isLoadingAction} onClick={() => handleRemoveFriend(req.username)} style={{ background: 'transparent', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>
-                  Cancel
-                </button>
-              </div>
-            ))}
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '20px', alignItems: 'stretch', flex: 1 }}>
+        
+        {/* Left Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: isMobile ? 'none' : '0 0 350px', width: isMobile ? '100%' : 'auto' }}>
+          <div className="glass-panel animate-fade-in" style={{ padding: '30px' }}>
+            <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <UserPlus size={20} color="#10b981" /> Add a Friend
+            </h2>
+            <form onSubmit={handleSendFriendRequest} style={{ display: 'flex', gap: '10px' }}>
+              <input type="text" className="input-field" placeholder="Username" value={friendUsername} onChange={(e) => setFriendUsername(e.target.value)} required />
+              <button type="submit" className="btn-primary" style={{ background: '#10b981' }}>Add</button>
+            </form>
+            {friendStatus && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '8px' }}>{friendStatus}</p>}
           </div>
-        </div>
-      )}
 
-      <div className="glass-panel animate-fade-in" style={{ padding: '30px', flex: 1, animationDelay: '0.2s', display: 'flex', flexDirection: 'column' }}>
+          {outgoingRequests.length > 0 && (
+            <div className="glass-panel animate-fade-in" style={{ padding: '30px', animationDelay: '0.15s' }}>
+              <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                Outgoing Requests
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {outgoingRequests.map((req, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '8px' }}>
+                    <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>{req.username}</span>
+                    <button disabled={isLoadingAction} onClick={() => handleRemoveFriend(req.username)} style={{ background: 'transparent', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>
+                      Cancel
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column */}
+        <div className="glass-panel animate-fade-in" style={{ padding: '30px', flex: 1, animationDelay: '0.2s', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Users size={20} color="var(--primary)" /> Friend List
