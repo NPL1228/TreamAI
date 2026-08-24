@@ -174,14 +174,14 @@ export default function Layout({ user, onLogout, children }) {
           overflowY: 'hidden'
         }}>
         
-          <div style={{ padding: '0 20px', marginBottom: '30px' }}>
+          <div style={{ flexShrink: 0, padding: '0 20px', marginBottom: '20px' }}>
             <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={() => handleNavigate('/dashboard')}>
               TreamAI
             </h2>
           </div>
 
           {/* Scrollable Lists */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          <div className="custom-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
             
             {/* Private Chats Section */}
             <div>
@@ -259,7 +259,7 @@ export default function Layout({ user, onLogout, children }) {
           </div>
 
           {/* Footer Actions (Popup) */}
-          <div ref={popupRef} style={{ position: 'relative', padding: '5px', borderTop: '1px solid var(--border)', marginTop: 'auto', marginBottom: '-15px' }}>
+          <div ref={popupRef} style={{ flexShrink: 0, position: 'relative', padding: '15px 20px 0 20px', borderTop: '1px solid var(--border)', marginTop: '20px' }}>
             {isPopupMounted && (
               <div style={{ 
                 position: 'absolute', bottom: '70px', left: '20px', right: '20px', 

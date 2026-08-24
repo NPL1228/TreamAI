@@ -34,12 +34,7 @@ async def handle_message(chat_id: str, text: str, user_name: str):
                 return response["text"]
             return None
         
-        # Route 2: Private Chat between standard users
-        if chat_type == "private" and chat_name != "TreamAI Agent":
-            print(">>> Private Chat (User to User) - Agent ignoring")
-            return None
-
-        # Route 3: Team Space
+        # Route 2: Team Space / Normal Private Chat
         
         # Check for inline action commands triggered by buttons
         if text.startswith("?ACTION:"):
