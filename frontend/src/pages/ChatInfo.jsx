@@ -6,6 +6,7 @@ export default function ChatInfo({ user }) {
   const { chatId } = useParams();
   const navigate = useNavigate();
   const [chatInfo, setChatInfo] = useState(null);
+  const [nicknames, setNicknames] = useState({});
   const [loading, setLoading] = useState(true);
   
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -30,17 +31,25 @@ export default function ChatInfo({ user }) {
 
   const fetchChatInfo = async () => {
     try {
+      let nickMap = {};
+      const nickRes = await fetch(`${baseUrl}/api/friends/nicknames/${user}`);
+      if (nickRes.ok) {
+        const nickData = await nickRes.json();
+        nickMap = nickData.nicknames;
+        setNicknames(nickMap);
+      }
+
       const res = await fetch(`${baseUrl}/api/chats/info/${chatId}`);
       if (res.ok) {
         const data = await res.json();
         let info = data.info;
         if (info.chat_type === 'private' && info.chat_name !== 'TreamAI Agent' && info.members) {
           const other = info.members.find(m => m.username !== user);
-          if (other) info.chat_name = other.username;
+          if (other) info.chat_name = nickMap[other.username] || other.username;
         }
         setChatInfo(info);
         setEditDescValue(info.description || '');
-        setAiListening(info.ai_listening !== false); // default to true if undefined
+        setAiListening(info.ai_listening !== false);
       }
     } catch (err) {
       console.error("Failed to fetch chat info", err);
@@ -215,9 +224,10 @@ export default function ChatInfo({ user }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {chatInfo.members?.map((member, idx) => (
               <div key={idx} style={{ padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : (member.color || 'var(--text)') }}>
-                  {member.username} {member.username === user && '(You)'}
-                </span>
+                  <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : (member.color || 'var(--text)') }}>
+                    {nicknames[member.username] || member.username} {member.username === user && '(You)'}
+                    {nicknames[member.username] && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '8px' }}>({member.username})</span>}
+                  </span>
                 <span style={{ fontSize: '0.85rem', padding: '4px 12px', background: member.role === 'owner' ? 'rgba(234, 179, 8, 0.2)' : 'rgba(255,255,255,0.1)', color: member.role === 'owner' ? '#eab308' : 'var(--text-muted)', borderRadius: '20px', textTransform: 'capitalize' }}>
                   {member.role}
                 </span>

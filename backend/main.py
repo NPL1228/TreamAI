@@ -351,6 +351,31 @@ async def api_friend_remove(req: FriendAcceptReq):
         return {"status": "success"}
     raise HTTPException(status_code=400, detail="Could not remove friend")
 
+@app.get("/api/friends/outgoing/{username}")
+async def api_get_outgoing_requests(username: str):
+    from memory.storage import get_outgoing_requests
+    outgoing = get_outgoing_requests(username)
+    return {"status": "success", "outgoing_requests": outgoing}
+
+@app.get("/api/friends/nicknames/{username}")
+async def api_get_nicknames(username: str):
+    from memory.storage import get_friend_nicknames
+    nicknames = get_friend_nicknames(username)
+    return {"status": "success", "nicknames": nicknames}
+
+class NicknameReq(BaseModel):
+    user_name: str
+    friend_name: str
+    nickname: str
+
+@app.post("/api/friends/nickname")
+async def api_set_nickname(req: NicknameReq):
+    from memory.storage import set_friend_nickname
+    success = set_friend_nickname(req.user_name, req.friend_name, req.nickname)
+    if success:
+        return {"status": "success"}
+    raise HTTPException(status_code=400, detail="Failed to set nickname")
+
 @app.get("/api/friends/{username}")
 async def api_get_friends(username: str):
     friends = get_friends(username)

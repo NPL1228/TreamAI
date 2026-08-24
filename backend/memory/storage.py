@@ -41,6 +41,13 @@ def init_db():
             UNIQUE(user1, user2)
         );
 
+        CREATE TABLE IF NOT EXISTS Friend_Nicknames (
+            user_name TEXT,
+            friend_name TEXT,
+            nickname TEXT,
+            PRIMARY KEY(user_name, friend_name)
+        );
+
         CREATE TABLE IF NOT EXISTS Projects (
             project_id  TEXT PRIMARY KEY,
             chat_id     TEXT,
@@ -374,8 +381,11 @@ def get_user_chats(username: str) -> list:
             cursor.execute("SELECT user_name FROM Chat_Members WHERE chat_id = ? AND user_name != ?", (chat_id, username))
             other = cursor.fetchone()
             if other:
-                chat_name = other[0]
-                
+                other_name = other[0]
+                cursor.execute("SELECT nickname FROM Friend_Nicknames WHERE user_name = ? AND friend_name = ?", (username, other_name))
+                nick = cursor.fetchone()
+                chat_name = nick[0] if nick else other_name
+
         chats.append({"chat_id": chat_id, "chat_name": chat_name, "chat_type": chat_type, "last_activity": last_activity, "unread": unread})
         
     conn.close()
@@ -600,3 +610,38 @@ def update_password(email: str, new_password_hash: str):
     conn.execute("DELETE FROM Password_Resets WHERE email = ?", (email,))
     conn.commit()
     conn.close()
+
+def get_outgoing_requests(username: str) -> list:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT user2 FROM Friendships WHERE user1 = ? AND status = 'pending'", (username,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"username": r[0]} for r in rows]
+
+def set_friend_nickname(user_name: str, friend_name: str, nickname: str) -> bool:
+    conn = get_connection()
+    try:
+        if nickname and nickname.strip():
+            conn.execute("""
+                INSERT INTO Friend_Nicknames (user_name, friend_name, nickname)
+                VALUES (?, ?, ?)
+                ON CONFLICT(user_name, friend_name) DO UPDATE SET nickname=excluded.nickname
+            """, (user_name, friend_name, nickname.strip()))
+        else:
+            conn.execute("DELETE FROM Friend_Nicknames WHERE user_name = ? AND friend_name = ?", (user_name, friend_name))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Nickname error: {e}")
+        return False
+    finally:
+        conn.close()
+
+def get_friend_nicknames(user_name: str) -> dict:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT friend_name, nickname FROM Friend_Nicknames WHERE user_name = ?", (user_name,))
+    rows = cursor.fetchall()
+    conn.close()
+    return {r[0]: r[1] for r in rows}

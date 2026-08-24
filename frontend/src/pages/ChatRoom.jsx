@@ -11,6 +11,7 @@ export default function ChatRoom({ user }) {
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
   const [chatInfo, setChatInfo] = useState(null);
+  const [nicknames, setNicknames] = useState({});
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isWaitingForAgent, setIsWaitingForAgent] = useState(false);
 
@@ -28,13 +29,22 @@ export default function ChatRoom({ user }) {
     const fetchChatInfo = async () => {
       try {
         const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+        
+        let nickMap = {};
+        const nickRes = await fetch(`${baseUrl}/api/friends/nicknames/${user}`);
+        if (nickRes.ok) {
+          const nickData = await nickRes.json();
+          nickMap = nickData.nicknames;
+          setNicknames(nickMap);
+        }
+
         const res = await fetch(`${baseUrl}/api/chats/info/${chatId}`);
         if (res.ok) {
           const data = await res.json();
           let info = data.info;
           if (info.chat_type === 'private' && info.chat_name !== 'TreamAI Agent' && info.members) {
             const other = info.members.find(m => m.username !== user);
-            if (other) info.chat_name = other.username;
+            if (other) info.chat_name = nickMap[other.username] || other.username;
           }
           setChatInfo(info);
         }
@@ -180,7 +190,7 @@ export default function ChatRoom({ user }) {
                 animation: 'fadeIn 0.3s ease'
               }}>
                 <div style={{ fontSize: '0.75rem', color: isMe || isAgent ? 'var(--text-muted)' : (msg.color || 'var(--text-muted)'), marginBottom: '4px', marginLeft: '4px', textAlign: isMe ? 'right' : 'left' }}>
-                  {msg.sender}
+                  {nicknames[msg.sender] || msg.sender}
                 </div>
                 <div style={{
                   padding: '12px 18px',
