@@ -191,9 +191,14 @@ export default function FriendsList({ user }) {
             {pendingRequests.map((req, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px' }}>
                 <span style={{ fontSize: '1.1rem' }}>{req.username}</span>
-                <button disabled={isLoadingAction} onClick={() => handleAcceptRequest(req.username)} style={{ background: isLoadingAction ? 'var(--text-muted)' : '#10b981', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <Check size={16} /> Accept
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button disabled={isLoadingAction} onClick={() => handleAcceptRequest(req.username)} style={{ background: isLoadingAction ? 'var(--text-muted)' : '#10b981', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Check size={16} /> Accept
+                  </button>
+                  <button disabled={isLoadingAction} onClick={() => handleRemoveFriend(req.username)} style={{ background: 'transparent', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <X size={16} /> Reject
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -255,7 +260,7 @@ export default function FriendsList({ user }) {
                     } else {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const spaceBelow = window.innerHeight - rect.bottom;
-                      setMenuPosition(spaceBelow < 120 ? 'top' : 'bottom');
+                      setMenuPosition(spaceBelow < 170 ? 'top' : 'bottom');
                       setActiveMenu(f.username);
                     }
                   }}
