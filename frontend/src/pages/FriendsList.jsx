@@ -182,29 +182,6 @@ export default function FriendsList({ user }) {
         {friendStatus && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '8px' }}>{friendStatus}</p>}
       </div>
 
-      {pendingRequests.length > 0 && (
-        <div className="glass-panel animate-fade-in" style={{ padding: '30px', marginBottom: '20px', animationDelay: '0.1s' }}>
-          <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            Pending Requests <span style={{ background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.85rem' }}>{pendingRequests.length}</span>
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {pendingRequests.map((req, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px' }}>
-                <span style={{ fontSize: '1.1rem' }}>{req.username}</span>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button disabled={isLoadingAction} onClick={() => handleAcceptRequest(req.username)} style={{ background: isLoadingAction ? 'var(--text-muted)' : '#10b981', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Check size={16} /> Accept
-                  </button>
-                  <button disabled={isLoadingAction} onClick={() => handleRemoveFriend(req.username)} style={{ background: 'transparent', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <X size={16} /> Reject
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {outgoingRequests.length > 0 && (
         <div className="glass-panel animate-fade-in" style={{ padding: '30px', marginBottom: '20px', animationDelay: '0.15s' }}>
           <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>

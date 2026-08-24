@@ -69,6 +69,22 @@ export default function Notifications({ user }) {
     }
   };
 
+  const handleRemoveFriend = async (friendUsername) => {
+    try {
+      const res = await fetch(`${baseUrl}/api/friends/remove`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user1: user, user2: friendUsername })
+      });
+      if (res.ok) {
+        fetchData();
+        window.dispatchEvent(new Event('sidebar-update'));
+      }
+    } catch (err) {
+      console.error("Failed to reject request", err);
+    }
+  };
+
   if (loading) return <div style={{ padding: '40px', color: 'white' }}>Loading notifications...</div>;
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -191,15 +207,22 @@ export default function Notifications({ user }) {
                       <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>Wants to be friends</p>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button 
-                      onClick={() => handleAcceptRequest(req.username)}
-                      className="btn-primary" 
-                      style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}
-                    >
-                      <Check size={18} /> Accept
-                    </button>
-                  </div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button 
+                        onClick={() => handleAcceptRequest(req.username)}
+                        className="btn-primary" 
+                        style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', background: '#10b981' }}
+                      >
+                        <Check size={18} /> Accept
+                      </button>
+                      <button 
+                        onClick={() => handleRemoveFriend(req.username)}
+                        style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.5)', borderRadius: '6px', cursor: 'pointer' }}
+                        className="hover-bg"
+                      >
+                        <X size={18} /> Reject
+                      </button>
+                    </div>
                 </div>
               ))
             )}
