@@ -260,7 +260,7 @@ export default function Layout({ user, onLogout, children }) {
           </div>
 
           {/* Footer Actions (Popup) */}
-          <div ref={popupRef} style={{ flexShrink: 0, position: 'relative', padding: '15px 20px 0 20px', borderTop: '1px solid var(--border)', marginTop: '20px' }}>
+          <div ref={popupRef} style={{ flexShrink: 0, position: 'relative', padding: '10px 20px 0 10px', borderTop: '1px solid var(--border)' }}>
             {isPopupMounted && (
               <div style={{ 
                 position: 'absolute', bottom: '70px', left: '20px', right: '20px', 
