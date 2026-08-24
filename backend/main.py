@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from memory.storage import init_db, register_user, authenticate_user, get_user_by_email, store_reset_token, validate_reset_token, update_password, get_user_chats, get_chat, create_chat, join_chat, send_friend_request, accept_friend_request, remove_friend, get_pending_requests, get_friends, update_chat_activity, get_chat_info, update_chat_description, save_message, get_chat_history, create_notification, get_notifications, mark_notifications_read, update_ai_listening, update_username, mark_chat_read
@@ -191,15 +191,33 @@ def send_reset_email(to_email: str, reset_link: str):
     except Exception as e:
         print(f"Failed to send email: {e}")
 
+import time
+login_attempts = {}
+
+def check_rate_limit(ip: str):
+    current_time = time.time()
+    if ip in login_attempts:
+        attempts, first_attempt_time = login_attempts[ip]
+        if current_time - first_attempt_time < 60:
+            if attempts >= 5:
+                raise HTTPException(status_code=429, detail="Too many attempts. Please try again in a minute.")
+            login_attempts[ip] = (attempts + 1, first_attempt_time)
+        else:
+            login_attempts[ip] = (1, current_time)
+    else:
+        login_attempts[ip] = (1, current_time)
+
 @app.post("/register")
-async def register(req: RegisterRequest):
+async def register(req: RegisterRequest, request: Request):
+    check_rate_limit(request.client.host)
     pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
     if register_user(req.username, req.email, pwd_hash):
         return {"status": "success", "message": "User registered"}
     raise HTTPException(status_code=400, detail="Username or email already exists")
 
 @app.post("/login")
-async def login(req: AuthRequest):
+async def login(req: AuthRequest, request: Request):
+    check_rate_limit(request.client.host)
     pwd_hash = hashlib.sha256(req.password.encode()).hexdigest()
     if authenticate_user(req.username, pwd_hash):
         return {"status": "success", "username": req.username}

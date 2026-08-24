@@ -14,6 +14,7 @@ export default function FriendsList({ user }) {
   const [activeMenu, setActiveMenu] = useState(null);
   const [menuPosition, setMenuPosition] = useState('bottom');
   const [confirmRemove, setConfirmRemove] = useState(null);
+  const [isLoadingAction, setIsLoadingAction] = useState(false);
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
@@ -37,9 +38,11 @@ export default function FriendsList({ user }) {
 
   const handleSendFriendRequest = async (e) => {
     e.preventDefault();
+    if (isLoadingAction) return;
     setFriendStatus('');
     if (!friendUsername.trim()) return;
 
+    setIsLoadingAction(true);
     try {
       const res = await fetch(`${baseUrl}/api/friends/request`, {
         method: 'POST',
@@ -54,10 +57,14 @@ export default function FriendsList({ user }) {
       }
     } catch (err) {
       setFriendStatus('Server error');
+    } finally {
+      setIsLoadingAction(false);
     }
   };
 
   const handleAcceptRequest = async (requester) => {
+    if (isLoadingAction) return;
+    setIsLoadingAction(true);
     try {
       const res = await fetch(`${baseUrl}/api/friends/accept`, {
         method: 'POST',
@@ -65,11 +72,13 @@ export default function FriendsList({ user }) {
         body: JSON.stringify({ user1: requester, user2: user })
       });
       if (res.ok) {
-        fetchData(); 
+        fetchData();
         window.dispatchEvent(new Event('sidebar-update'));
       }
     } catch (err) {
       console.error("Error accepting request", err);
+    } finally {
+      setIsLoadingAction(false);
     }
   };
 
@@ -87,6 +96,8 @@ export default function FriendsList({ user }) {
   };
 
   const handleRemoveFriend = async (friendUsername) => {
+    if (isLoadingAction) return;
+    setIsLoadingAction(true);
     try {
       const res = await fetch(`${baseUrl}/api/friends/remove`, {
         method: 'POST',
@@ -101,6 +112,8 @@ export default function FriendsList({ user }) {
       }
     } catch (err) {
       console.error("Failed to remove friend", err);
+    } finally {
+      setIsLoadingAction(false);
     }
   };
 

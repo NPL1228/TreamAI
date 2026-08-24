@@ -22,6 +22,10 @@ export default function Dashboard({ user, onLogout }) {
   const [joinError, setJoinError] = useState('');
   const [createError, setCreateError] = useState('');
 
+  const [isAddingFriend, setIsAddingFriend] = useState(false);
+  const [isJoiningTeam, setIsJoiningTeam] = useState(false);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
   useEffect(() => {
@@ -53,9 +57,11 @@ export default function Dashboard({ user, onLogout }) {
 
   const handleSendFriendRequest = async (e) => {
     e.preventDefault();
+    if (isAddingFriend) return;
     setFriendStatus('');
     if (!friendUsername.trim()) return;
 
+    setIsAddingFriend(true);
     try {
       const res = await fetch(`${baseUrl}/api/friends/request`, {
         method: 'POST',
@@ -70,6 +76,8 @@ export default function Dashboard({ user, onLogout }) {
       }
     } catch (err) {
       setFriendStatus('Server error');
+    } finally {
+      setIsAddingFriend(false);
     }
   };
 
@@ -91,9 +99,11 @@ export default function Dashboard({ user, onLogout }) {
 
   const handleJoinTeam = async (e) => {
     e.preventDefault();
+    if (isJoiningTeam) return;
     setJoinError('');
     if (!joinCode.trim()) return;
 
+    setIsJoiningTeam(true);
     try {
       const res = await fetch(`${baseUrl}/api/chats/join`, {
         method: 'POST',
@@ -108,14 +118,18 @@ export default function Dashboard({ user, onLogout }) {
       }
     } catch (err) {
       setJoinError('Server error');
+    } finally {
+      setIsJoiningTeam(false);
     }
   };
 
   const handleCreateTeam = async (e) => {
     e.preventDefault();
+    if (isCreatingTeam) return;
     setCreateError('');
     if (!newChatName.trim()) return;
 
+    setIsCreatingTeam(true);
     try {
       const res = await fetch(`${baseUrl}/api/chats/create`, {
         method: 'POST',
@@ -130,6 +144,8 @@ export default function Dashboard({ user, onLogout }) {
       }
     } catch (err) {
       setCreateError('Server error');
+    } finally {
+      setIsCreatingTeam(false);
     }
   };
 
@@ -165,7 +181,9 @@ export default function Dashboard({ user, onLogout }) {
               <h3 style={{ fontSize: '1rem', marginBottom: '10px' }}>Add Friend</h3>
               <form onSubmit={handleSendFriendRequest} style={{ display: 'flex', gap: '10px' }}>
                 <input type="text" className="input-field" placeholder="Username" value={friendUsername} onChange={(e) => setFriendUsername(e.target.value)} required />
-                <button type="submit" className="btn-primary" style={{ background: '#10b981' }}>Add</button>
+                <button type="submit" className="btn-primary" style={{ background: isAddingFriend ? 'var(--text-muted)' : '#10b981' }} disabled={isAddingFriend}>
+                  {isAddingFriend ? '...' : 'Add'}
+                </button>
               </form>
               {friendStatus && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '8px' }}>{friendStatus}</p>}
             </div>
@@ -185,7 +203,9 @@ export default function Dashboard({ user, onLogout }) {
               <h3 style={{ fontSize: '1rem', marginBottom: '10px' }}>Join via Code</h3>
               <form onSubmit={handleJoinTeam} style={{ display: 'flex', gap: '10px' }}>
                 <input type="text" className="input-field" placeholder="8-digit code" value={joinCode} onChange={(e) => setJoinCode(e.target.value)} required />
-                <button type="submit" className="btn-primary">Join</button>
+                <button type="submit" className="btn-primary" disabled={isJoiningTeam} style={{ background: isJoiningTeam ? 'var(--text-muted)' : 'var(--primary)' }}>
+                  {isJoiningTeam ? '...' : 'Join'}
+                </button>
               </form>
               {joinError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '5px' }}>{joinError}</p>}
             </div>
@@ -194,8 +214,8 @@ export default function Dashboard({ user, onLogout }) {
               <h3 style={{ fontSize: '1rem', marginBottom: '10px' }}>Create New Team</h3>
               <form onSubmit={handleCreateTeam} style={{ display: 'flex', gap: '10px' }}>
                 <input type="text" className="input-field" placeholder="Team Name" value={newChatName} onChange={(e) => setNewChatName(e.target.value)} required />
-                <button type="submit" className="btn-primary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                  <Plus size={18} /> Create
+                <button type="submit" className="btn-primary" disabled={isCreatingTeam} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: isCreatingTeam ? 'var(--text-muted)' : 'var(--primary)' }}>
+                  {isCreatingTeam ? '...' : <><Plus size={18} /> Create</>}
                 </button>
               </form>
               {createError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '5px' }}>{createError}</p>}

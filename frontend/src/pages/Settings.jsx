@@ -9,6 +9,8 @@ export default function Settings({ user, onUserUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState({ type: '', msg: '' });
 
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     document.title = 'Settings | TreamAI';
     if (user) {
@@ -25,11 +27,13 @@ export default function Settings({ user, onUserUpdate }) {
   }, [user]);
 
   const handleUpdateUsername = async () => {
+    if (isSaving) return;
     if (!newUsername.trim() || newUsername === user) {
       setIsEditing(false);
       return;
     }
     
+    setIsSaving(true);
     try {
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
       const res = await fetch(`${baseUrl}/api/users/update_username`, {
@@ -48,6 +52,8 @@ export default function Settings({ user, onUserUpdate }) {
       }
     } catch (err) {
       setStatus({ type: 'error', msg: 'Server connection error' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -85,7 +91,9 @@ export default function Settings({ user, onUserUpdate }) {
               />
             </div>
             {isEditing ? (
-              <button onClick={handleUpdateUsername} className="btn-primary" style={{ padding: '12px 20px', height: '48px' }}>Save</button>
+              <button onClick={handleUpdateUsername} className="btn-primary" disabled={isSaving} style={{ padding: '12px 20px', height: '48px', background: isSaving ? 'var(--text-muted)' : 'var(--primary)' }}>
+                {isSaving ? '...' : 'Save'}
+              </button>
             ) : (
               <button onClick={() => setIsEditing(true)} className="btn-primary" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', padding: '12px 20px', height: '48px' }}>Edit</button>
             )}
