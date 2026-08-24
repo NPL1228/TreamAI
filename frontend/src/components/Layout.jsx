@@ -114,11 +114,12 @@ export default function Layout({ user, onLogout, children }) {
   const displayTeamChats = teamChats.slice(0, 3);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100dvh', width: '100vw', overflow: 'hidden' }}>
       
       {/* Sidebar */}
       <div style={{ 
         width: isSidebarOpen ? (isMobile ? '100vw' : '280px') : '0px', 
+        flexShrink: 0,
         background: 'rgba(255, 255, 255, 0.03)', 
         borderRight: '1px solid var(--border)',
         display: 'flex', 
