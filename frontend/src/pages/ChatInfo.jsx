@@ -215,7 +215,7 @@ export default function ChatInfo({ user }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {chatInfo.members?.map((member, idx) => (
               <div key={idx} style={{ padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : 'var(--text)' }}>
+                <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : (member.color || 'var(--text)') }}>
                   {member.username} {member.username === user && '(You)'}
                 </span>
                 <span style={{ fontSize: '0.85rem', padding: '4px 12px', background: member.role === 'owner' ? 'rgba(234, 179, 8, 0.2)' : 'rgba(255,255,255,0.1)', color: member.role === 'owner' ? '#eab308' : 'var(--text-muted)', borderRadius: '20px', textTransform: 'capitalize' }}>

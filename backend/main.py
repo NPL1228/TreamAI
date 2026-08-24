@@ -380,7 +380,13 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
             
             # Persist and broadcast the user's message
             save_message(chat_id, username, text)
-            user_msg = json.dumps({"sender": username, "text": text})
+            
+            from memory.storage import get_user_color
+            user_msg = json.dumps({
+                "sender": username, 
+                "text": text,
+                "color": get_user_color(chat_id, username)
+            })
             await manager.broadcast(user_msg, chat_id)
             
             # Update chat activity
@@ -396,7 +402,11 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
             # If TreamAI has a response, persist and broadcast it
             if response:
                 save_message(chat_id, "TreamAI Agent", response)
-                agent_msg = json.dumps({"sender": "TreamAI Agent", "text": response})
+                agent_msg = json.dumps({
+                    "sender": "TreamAI Agent", 
+                    "text": response,
+                    "color": get_user_color(chat_id, "TreamAI Agent")
+                })
                 await manager.broadcast(agent_msg, chat_id)
                 
             # Send global notification to all members to update unread counts and sidebar ordering

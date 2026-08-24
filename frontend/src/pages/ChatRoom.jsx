@@ -179,7 +179,7 @@ export default function ChatRoom({ user }) {
                 maxWidth: '70%',
                 animation: 'fadeIn 0.3s ease'
               }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', marginLeft: '4px', textAlign: isMe ? 'right' : 'left' }}>
+                <div style={{ fontSize: '0.75rem', color: isMe || isAgent ? 'var(--text-muted)' : (msg.color || 'var(--text-muted)'), marginBottom: '4px', marginLeft: '4px', textAlign: isMe ? 'right' : 'left' }}>
                   {msg.sender}
                 </div>
                 <div style={{

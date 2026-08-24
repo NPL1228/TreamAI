@@ -267,6 +267,22 @@ def save_message(chat_id: str, sender: str, text: str):
     conn.commit()
     conn.close()
 
+import hashlib
+
+USER_COLORS = [
+    "#E57373", "#F06292", "#BA68C8", "#9575CD", "#7986CB", 
+    "#64B5F6", "#4FC3F7", "#4DB6AC", "#81C784", "#AED581", 
+    "#FFD54F", "#FFB74D", "#FF8A65", "#A1887F", "#90A4AE",
+]
+
+def get_user_color(space_id: str, user_id: str) -> str:
+    if user_id == "TreamAI Agent":
+        return "#ffffff" # Default white/secondary for agent, handled by UI mostly
+    key = f"{space_id}:{user_id}"
+    hash_value = hashlib.sha256(key.encode("utf-8")).hexdigest()
+    index = int(hash_value, 16) % len(USER_COLORS)
+    return USER_COLORS[index]
+
 def get_chat_history(chat_id: str, limit: int = 50):
     conn = get_connection()
     cursor = conn.cursor()
@@ -282,7 +298,7 @@ def get_chat_history(chat_id: str, limit: int = 50):
     
     # Reverse to return them in chronological order
     rows.reverse()
-    return [{"sender": r[0], "text": r[1], "timestamp": r[2]} for r in rows]
+    return [{"sender": r[0], "text": r[1], "timestamp": r[2], "color": get_user_color(chat_id, r[0])} for r in rows]
 
 def create_notification(username: str, title: str, message: str):
     conn = get_connection()
@@ -403,7 +419,7 @@ def accept_friend_request(user1: str, user2: str) -> bool:
         if not chat_id:
             # Generate new chat
             chat_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-            conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, 'private')", (chat_id, f"Chat with {user2}"))
+            conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, 'private')", (chat_id, None))
             conn.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'member')", (chat_id, user1))
             conn.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'member')", (chat_id, user2))
         conn.commit()
@@ -492,7 +508,7 @@ def get_chat_info(chat_id: str):
     rows = cursor.fetchall()
     conn.close()
     
-    chat["members"] = [{"username": r[0], "role": r[1], "joined_at": r[2]} for r in rows]
+    chat["members"] = [{"username": r[0], "role": r[1], "joined_at": r[2], "color": get_user_color(chat_id, r[0])} for r in rows]
     return chat
 
 def update_chat_description(chat_id: str, description: str) -> bool:
