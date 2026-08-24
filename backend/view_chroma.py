@@ -12,9 +12,11 @@ def view_chroma():
     print(f"Found {len(collections)} collections.")
     
     for coll in collections:
-        print(f"\n--- Collection: {coll.name} ---")
+        # Chroma API returns strings in newer versions, and objects in older versions
+        coll_name = coll if isinstance(coll, str) else coll.name
+        print(f"\n--- Collection: {coll_name} ---")
         try:
-            collection = client.get_collection(coll.name)
+            collection = client.get_collection(coll_name)
             # Fetch all items in the collection
             data = collection.get()
             

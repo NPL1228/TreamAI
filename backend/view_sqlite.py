@@ -29,6 +29,12 @@ def view_table(table_name):
     conn.close()
 
 if __name__ == "__main__":
-    tables = ["Chats", "Projects", "Chat_Members", "Weights", "Message_Buffer"]
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    # Fetch all table names dynamically
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    tables = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    
     for t in tables:
         view_table(t)

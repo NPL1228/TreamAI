@@ -35,7 +35,7 @@ def process_incoming_message(chat_id: str, message: str, user_name: str):
         traceback.print_exc()
 
         return {
-            "text": "⚠️ Storage pipeline failed."
+            "text": "Storage pipeline failed."
         }
 
 
@@ -112,7 +112,7 @@ def handle_action(chat_id: str, action_name: str, parameters: dict):
         )
 
         return {
-            "text": f"✅ Project '{project_name}' created successfully."
+            "text": f"Project '{project_name}' created successfully."
         }
 
     if action_name == "ignore_project":
