@@ -164,7 +164,14 @@ export default function ChatList({ user, type }) {
                 ) : (
                   <Hash size={20} color="var(--text-muted)" />
                 )}
-                <span style={{ fontSize: '1.1rem', fontWeight: chat.chat_name === 'TreamAI Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: chat.chat_name === 'TreamAI Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
+                  {chat.role === 'left' && (
+                    <span style={{ fontSize: '0.7rem', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '2px 8px', borderRadius: '10px' }}>
+                      Left
+                    </span>
+                  )}
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
                 {chat.unread > 0 && (

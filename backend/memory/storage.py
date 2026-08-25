@@ -116,6 +116,11 @@ def init_db():
         cursor.execute("ALTER TABLE Chat_Members ADD COLUMN left_at TIMESTAMP")
     except sqlite3.OperationalError:
         pass # Column already exists
+        
+    try:
+        cursor.execute("ALTER TABLE Chat_Members ADD COLUMN is_deleted INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass # Column already exists
 
     conn.commit()
     conn.close()
@@ -386,7 +391,7 @@ def get_user_chats(username: str) -> list:
                cm.role
         FROM Chats c
         JOIN Chat_Members cm ON c.chat_id = cm.chat_id
-        WHERE cm.user_name = ?
+        WHERE cm.user_name = ? AND (cm.is_deleted = 0 OR cm.is_deleted IS NULL)
         ORDER BY c.last_activity DESC
     """, (username,))
     rows = cursor.fetchall()
@@ -574,7 +579,7 @@ def create_chat(chat_name: str, chat_type: str, username: str) -> str:
 def assign_next_owner(chat_id: str, cursor) -> bool:
     cursor.execute("""
         SELECT user_name FROM Chat_Members 
-        WHERE chat_id = ? AND role != 'left' 
+        WHERE chat_id = ? AND role != 'left' AND (is_deleted = 0 OR is_deleted IS NULL)
         ORDER BY joined_at ASC LIMIT 1
     """, (chat_id,))
     next_user = cursor.fetchone()
@@ -627,14 +632,15 @@ def delete_chat(chat_id: str, username: str = None) -> bool:
             if not row: return False
             role = row[0]
             
-            cursor.execute("DELETE FROM Chat_Members WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+            # Use soft delete so the user remains in history
+            cursor.execute("UPDATE Chat_Members SET is_deleted = 1 WHERE chat_id = ? AND user_name = ?", (chat_id, username))
             
             if role == 'owner':
                 has_next = assign_next_owner(chat_id, cursor)
                 if not has_next:
                     drop_chat_entirely(chat_id, cursor)
             else:
-                cursor.execute("SELECT 1 FROM Chat_Members WHERE chat_id = ? AND role != 'left'", (chat_id,))
+                cursor.execute("SELECT 1 FROM Chat_Members WHERE chat_id = ? AND role != 'left' AND (is_deleted = 0 OR is_deleted IS NULL)", (chat_id,))
                 if not cursor.fetchone():
                     drop_chat_entirely(chat_id, cursor)
         else:
@@ -658,13 +664,18 @@ def join_chat(chat_id: str, username: str) -> bool:
     if not cursor.fetchone():
         conn.close()
         return False
-        
+
     try:
-        conn.execute("INSERT INTO Chat_Members (chat_id, user_name) VALUES (?, ?)", (chat_id, username))
+        cursor.execute("SELECT role FROM Chat_Members WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+        row = cursor.fetchone()
+        if row:
+            # User already in DB (might be left or deleted), reinstate them
+            cursor.execute("UPDATE Chat_Members SET role = 'member', joined_at = CURRENT_TIMESTAMP, left_at = NULL, is_deleted = 0 WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+        else:
+            cursor.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'member')", (chat_id, username))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
-        # Already a member
         return True
     finally:
         conn.close()

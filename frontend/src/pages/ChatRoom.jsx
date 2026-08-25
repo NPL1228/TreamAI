@@ -289,38 +289,44 @@ export default function ChatRoom({ user }) {
 
         {/* Input Area */}
         <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'transparent' }}>
-          <form onSubmit={sendMessage} style={{ display: 'flex', gap: '10px' }}>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage(e);
-                }
-              }}
-              placeholder="Message this chat... (use @agent to ask TreamAI)"
-              className="input-field"
-              rows={1}
-              style={{ 
-                flex: 1, 
-                borderRadius: '24px', 
-                padding: '16px 25px', 
-                fontSize: '1.1rem',
-                minHeight: '56px',
-                maxHeight: '120px',
-                resize: 'none',
-                wordBreak: 'break-word',
-                whiteSpace: 'pre-wrap',
-                fontFamily: 'inherit',
-                overflowY: 'auto',
-                lineHeight: '1.5'
-              }}
-            />
-            <button type="submit" className="btn-primary" style={{ borderRadius: '50%', width: '56px', height: '56px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Send size={24} style={{ marginLeft: '-2px' }} />
-            </button>
-          </form>
+          {chatInfo?.members && !chatInfo.members.some(m => m.username === user && m.role !== 'left') ? (
+            <div style={{ textAlign: 'center', padding: '15px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+              You are no longer an active member of this chat. You cannot send new messages.
+            </div>
+          ) : (
+            <form onSubmit={sendMessage} style={{ display: 'flex', gap: '10px' }}>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(e);
+                  }
+                }}
+                placeholder="Message this chat... (use @agent to ask TreamAI)"
+                className="input-field"
+                rows={1}
+                style={{ 
+                  flex: 1, 
+                  borderRadius: '24px', 
+                  padding: '16px 25px', 
+                  fontSize: '1.1rem',
+                  minHeight: '56px',
+                  maxHeight: '120px',
+                  resize: 'none',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: 'inherit',
+                  overflowY: 'auto',
+                  lineHeight: '1.5'
+                }}
+              />
+              <button type="submit" className="btn-primary" style={{ borderRadius: '50%', width: '56px', height: '56px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Send size={24} style={{ marginLeft: '-2px' }} />
+              </button>
+            </form>
+          )}
         </div>
       </div>
 

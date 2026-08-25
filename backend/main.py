@@ -280,6 +280,15 @@ async def api_create_chat(req: CreateChatRequest):
 @app.post("/api/chats/join")
 async def api_join_chat(req: JoinChatRequest):
     if join_chat(req.chat_id, req.username):
+        # Broadcast joined message
+        save_message(req.chat_id, "system", f"{req.username} joined")
+        info = get_chat_info(req.chat_id)
+        if info and "members" in info:
+            import asyncio
+            for m in info["members"]:
+                if m["role"] != "left":
+                    asyncio.create_task(manager.notify_user(m["username"], {"type": "new_message", "chat_id": req.chat_id}))
+
         chat = get_chat(req.chat_id)
         return {"status": "success", "chat": chat}
     raise HTTPException(status_code=404, detail="Chat code not found")
@@ -431,6 +440,21 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
         while True:
             text = await websocket.receive_text()
             
+            # Check if user is an active member
+            from memory.storage import get_chat_info
+            info = get_chat_info(chat_id)
+            
+            is_active_member = False
+            if info and "members" in info:
+                for m in info["members"]:
+                    if m["username"] == username and m["role"] != "left":
+                        is_active_member = True
+                        break
+                        
+            # Allow agents, or active members
+            if username != 'TreamAI Agent' and not is_active_member:
+                continue
+
             # Persist and broadcast the user's message
             save_message(chat_id, username, text)
             
