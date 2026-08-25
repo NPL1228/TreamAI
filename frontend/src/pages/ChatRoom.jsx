@@ -63,7 +63,7 @@ export default function ChatRoom({ user }) {
     setIsLoading(true);
 
     // Fetch message history first
-    fetch(`${baseUrl}/api/chats/${chatId}/messages`)
+    fetch(`${baseUrl}/api/chats/${chatId}/messages?username=${encodeURIComponent(user)}`)
       .then(res => res.json())
       .then(data => {
         if (isMounted && data.messages) {
@@ -180,6 +180,16 @@ export default function ChatRoom({ user }) {
               <p>Ready to collaborate? Send your first message to get started.</p>
             </div>
           ) : messages.map((msg, idx) => {
+            if (msg.sender === 'system') {
+              return (
+                <div key={idx} style={{ textAlign: 'center', margin: '15px 0' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.1)', padding: '5px 12px', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    {msg.text}
+                  </span>
+                </div>
+              );
+            }
+
             const isMe = msg.sender === user;
             const isAgent = msg.sender === 'TreamAI Agent';
 

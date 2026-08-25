@@ -214,7 +214,7 @@ export default function Layout({ user, onLogout, children }) {
                     )}
                   </div>
                 ))}
-                {privateChats.length > 4 && (
+                {privateChats.length > 0 && (
                   <span onClick={() => handleNavigate('/chats/private')} style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', marginTop: '5px' }}>Show More...</span>
                 )}
               </div>
@@ -251,7 +251,7 @@ export default function Layout({ user, onLogout, children }) {
                   </div>
                 ))}
                 {teamChats.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>No teams yet.</p>}
-                {teamChats.length > 3 && (
+                {teamChats.length > 0 && (
                   <span onClick={() => handleNavigate('/chats/team')} style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', marginTop: '5px' }}>Show More...</span>
                 )}
               </div>

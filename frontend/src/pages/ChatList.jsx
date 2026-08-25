@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, MessageSquare, Hash } from 'lucide-react';
+import { ArrowLeft, Search, MessageSquare, Hash, MoreVertical, Trash2, X } from 'lucide-react';
 
 export default function ChatList({ user, type }) {
   const navigate = useNavigate();
   const [chats, setChats] = useState([]);
   const [search, setSearch] = useState('');
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const globalWs = useRef(null);
 
@@ -43,6 +46,51 @@ export default function ChatList({ user, type }) {
       if (globalWs.current) globalWs.current.close();
     };
   }, [user, type, baseUrl, wsUrl]);
+
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenu(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleDeleteChat = async (chatId) => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`${baseUrl}/api/chats/${chatId}?username=${encodeURIComponent(user)}`, { method: 'DELETE' });
+      if (res.ok) {
+        setConfirmDelete(null);
+        setActiveMenu(null);
+        fetchChats();
+        window.dispatchEvent(new Event('sidebar-update'));
+      }
+    } catch (err) {
+      console.error("Failed to delete chat", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleLeaveChat = async (chatId) => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`${baseUrl}/api/chats/${chatId}/leave`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user })
+      });
+      if (res.ok) {
+        setConfirmDelete(null);
+        setActiveMenu(null);
+        fetchChats();
+      }
+    } catch (err) {
+      console.error("Failed to leave chat", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const filteredChats = chats.filter(c => c.chat_name.toLowerCase().includes(search.toLowerCase()));
   
@@ -127,6 +175,59 @@ export default function ChatList({ user, type }) {
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                   {formatTimeAgo(chat.last_activity)}
                 </div>
+                
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setActiveMenu(activeMenu === chat.chat_id ? null : chat.chat_id);
+                    }}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '5px' }}
+                  >
+                    <MoreVertical size={20} />
+                  </button>
+                  {activeMenu === chat.chat_id && (
+                    <div className="animate-fade-in" style={{ 
+                      position: 'absolute', 
+                      right: 0, 
+                      top: '35px',
+                      background: '#1f2229', 
+                      border: '1px solid var(--border)', 
+                      borderRadius: '8px', 
+                      padding: '5px', 
+                      zIndex: 10, 
+                      width: '120px', 
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.5)' 
+                    }}>
+                      {type === 'team' && chat.role !== 'left' ? (
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setConfirmDelete({ id: chat.chat_id, action: 'leave' }); 
+                            setActiveMenu(null); 
+                          }}
+                          style={{ width: '100%', background: 'transparent', border: 'none', color: '#f59e0b', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                          className="hover-bg"
+                        >
+                          Leave
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setConfirmDelete({ id: chat.chat_id, action: 'delete' }); 
+                            setActiveMenu(null); 
+                          }}
+                          style={{ width: '100%', background: 'transparent', border: 'none', color: '#ef4444', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                          className="hover-bg"
+                        >
+                          <Trash2 size={16} /> Delete
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
               </div>
             </div>
           ))}
@@ -135,6 +236,32 @@ export default function ChatList({ user, type }) {
           )}
         </div>
       </div>
+
+      {confirmDelete && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div className="glass-panel animate-fade-in" style={{ padding: '30px', maxWidth: '400px', width: '90%', position: 'relative' }}>
+            <button onClick={() => setConfirmDelete(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+            <h2 style={{ margin: '0 0 15px 0', fontSize: '1.4rem' }}>{confirmDelete.action === 'leave' ? 'Leave Chat?' : 'Delete Chat?'}</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '25px', lineHeight: '1.5' }}>
+              {confirmDelete.action === 'leave' 
+                ? "Are you sure you want to leave this team chat? You won't be able to send new messages." 
+                : "Are you sure you want to permanently remove this chat from your list? This action cannot be undone."}
+            </p>
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmDelete(null)} style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+              <button 
+                disabled={isDeleting} 
+                onClick={() => confirmDelete.action === 'leave' ? handleLeaveChat(confirmDelete.id) : handleDeleteChat(confirmDelete.id)} 
+                style={{ background: isDeleting ? 'var(--text-muted)' : (confirmDelete.action === 'leave' ? '#f59e0b' : '#ef4444'), color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+              >
+                {confirmDelete.action === 'leave' ? 'Leave' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

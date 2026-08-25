@@ -284,6 +284,34 @@ async def api_join_chat(req: JoinChatRequest):
         return {"status": "success", "chat": chat}
     raise HTTPException(status_code=404, detail="Chat code not found")
 
+@app.delete("/api/chats/{chat_id}")
+async def api_delete_chat(chat_id: str, username: str):
+    from memory.storage import delete_chat
+    if delete_chat(chat_id, username):
+        return {"status": "success"}
+    raise HTTPException(status_code=500, detail="Failed to delete chat")
+
+class LeaveChatRequest(BaseModel):
+    username: str
+
+@app.post("/api/chats/{chat_id}/leave")
+async def api_leave_chat(chat_id: str, req: LeaveChatRequest):
+    from memory.storage import leave_chat, save_message, get_chat_info
+    status = leave_chat(chat_id, req.username)
+    if status == "error":
+        raise HTTPException(status_code=500, detail="Failed to leave chat")
+    
+    if status == "left":
+        save_message(chat_id, "system", f"{req.username} left")
+        info = get_chat_info(chat_id)
+        if info and "members" in info:
+            for m in info["members"]:
+                if m["role"] != "left":
+                    import asyncio
+                    asyncio.create_task(manager.notify_user(m["username"], {"type": "new_message", "chat_id": chat_id}))
+            
+    return {"status": "success", "result": status}
+
 @app.get("/api/chats/info/{chat_id}")
 async def api_get_chat_info(chat_id: str):
     info = get_chat_info(chat_id)
@@ -306,8 +334,8 @@ async def api_update_ai_listening(chat_id: str, req: AiListeningReq):
     raise HTTPException(status_code=400, detail="Failed to update ai listening status")
 
 @app.get("/api/chats/{chat_id}/messages")
-async def api_get_chat_messages(chat_id: str):
-    messages = get_chat_history(chat_id, limit=50)
+async def api_get_chat_messages(chat_id: str, username: str = None):
+    messages = get_chat_history(chat_id, limit=50, username=username)
     return {"status": "success", "messages": messages}
 
 @app.get("/api/notifications/unread/{username}")

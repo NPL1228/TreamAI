@@ -63,6 +63,7 @@ def init_db():
             role        TEXT DEFAULT 'member',
             joined_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_read   TIMESTAMP,
+            left_at     TIMESTAMP,
             PRIMARY KEY (chat_id, user_name)
         );
 
@@ -290,16 +291,32 @@ def get_user_color(space_id: str, user_id: str) -> str:
     index = int(hash_value, 16) % len(USER_COLORS)
     return USER_COLORS[index]
 
-def get_chat_history(chat_id: str, limit: int = 50):
+def get_chat_history(chat_id: str, limit: int = 50, username: str = None):
     conn = get_connection()
     cursor = conn.cursor()
-    # We select DESC to get the latest `limit` messages, then reverse them
-    cursor.execute("""
-        SELECT sender, text, timestamp FROM Messages
-        WHERE chat_id = ?
-        ORDER BY timestamp DESC
-        LIMIT ?
-    """, (chat_id, limit))
+    
+    left_at = None
+    if username:
+        cursor.execute("SELECT left_at FROM Chat_Members WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+        row = cursor.fetchone()
+        if row and row[0]:
+            left_at = row[0]
+            
+    if left_at:
+        cursor.execute("""
+            SELECT sender, text, timestamp FROM Messages 
+            WHERE chat_id = ? AND timestamp <= ?
+            ORDER BY timestamp DESC 
+            LIMIT ?
+        """, (chat_id, left_at, limit))
+    else:
+        cursor.execute("""
+            SELECT sender, text, timestamp FROM Messages 
+            WHERE chat_id = ?
+            ORDER BY timestamp DESC 
+            LIMIT ?
+        """, (chat_id, limit))
+        
     rows = cursor.fetchall()
     conn.close()
     
@@ -360,7 +377,8 @@ def get_user_chats(username: str) -> list:
         SELECT c.chat_id, c.chat_name, c.chat_type, c.last_activity,
                (SELECT COUNT(*) FROM Messages m 
                 WHERE m.chat_id = c.chat_id 
-                AND m.timestamp > COALESCE(cm.last_read, '1970-01-01')) AS unread_count
+                AND m.timestamp > COALESCE(cm.last_read, '1970-01-01')) AS unread_count,
+               cm.role
         FROM Chats c
         JOIN Chat_Members cm ON c.chat_id = cm.chat_id
         WHERE cm.user_name = ?
@@ -385,8 +403,9 @@ def get_user_chats(username: str) -> list:
                 cursor.execute("SELECT nickname FROM Friend_Nicknames WHERE user_name = ? AND friend_name = ?", (username, other_name))
                 nick = cursor.fetchone()
                 chat_name = nick[0] if nick else other_name
-
-        chats.append({"chat_id": chat_id, "chat_name": chat_name, "chat_type": chat_type, "last_activity": last_activity, "unread": unread})
+                
+        role = r[5]
+        chats.append({"chat_id": chat_id, "chat_name": chat_name, "chat_type": chat_type, "last_activity": last_activity, "unread": unread, "role": role})
         
     conn.close()
     return chats
@@ -546,6 +565,84 @@ def create_chat(chat_name: str, chat_type: str, username: str) -> str:
     conn.commit()
     conn.close()
     return chat_id
+
+def assign_next_owner(chat_id: str, cursor) -> bool:
+    cursor.execute("""
+        SELECT user_name FROM Chat_Members 
+        WHERE chat_id = ? AND role != 'left' 
+        ORDER BY joined_at ASC LIMIT 1
+    """, (chat_id,))
+    next_user = cursor.fetchone()
+    if next_user:
+        cursor.execute("UPDATE Chat_Members SET role = 'owner' WHERE chat_id = ? AND user_name = ?", (chat_id, next_user[0]))
+        return True
+    return False
+
+def drop_chat_entirely(chat_id: str, cursor):
+    cursor.execute("DELETE FROM Chat_Members WHERE chat_id = ?", (chat_id,))
+    cursor.execute("DELETE FROM Messages WHERE chat_id = ?", (chat_id,))
+    cursor.execute("DELETE FROM Message_Buffer WHERE chat_id = ?", (chat_id,))
+    cursor.execute("DELETE FROM Weights WHERE chat_id = ?", (chat_id,))
+    cursor.execute("DELETE FROM Projects WHERE chat_id = ?", (chat_id,))
+    cursor.execute("DELETE FROM Chats WHERE chat_id = ?", (chat_id,))
+
+def leave_chat(chat_id: str, username: str) -> str:
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT role FROM Chat_Members WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+        row = cursor.fetchone()
+        if not row: return "error"
+        role = row[0]
+        
+        cursor.execute("UPDATE Chat_Members SET role = 'left', left_at = CURRENT_TIMESTAMP WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+        
+        if role == 'owner':
+            has_next = assign_next_owner(chat_id, cursor)
+            if not has_next:
+                drop_chat_entirely(chat_id, cursor)
+                conn.commit()
+                return "dropped"
+                
+        conn.commit()
+        return "left"
+    except Exception as e:
+        print("Leave chat err:", e)
+        return "error"
+    finally:
+        conn.close()
+
+def delete_chat(chat_id: str, username: str = None) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        if username:
+            cursor.execute("SELECT role FROM Chat_Members WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+            row = cursor.fetchone()
+            if not row: return False
+            role = row[0]
+            
+            cursor.execute("DELETE FROM Chat_Members WHERE chat_id = ? AND user_name = ?", (chat_id, username))
+            
+            if role == 'owner':
+                has_next = assign_next_owner(chat_id, cursor)
+                if not has_next:
+                    drop_chat_entirely(chat_id, cursor)
+            else:
+                cursor.execute("SELECT 1 FROM Chat_Members WHERE chat_id = ? AND role != 'left'", (chat_id,))
+                if not cursor.fetchone():
+                    drop_chat_entirely(chat_id, cursor)
+        else:
+            # Fallback for full deletion
+            drop_chat_entirely(chat_id, cursor)
+            
+        conn.commit()
+        return True
+    except Exception as e:
+        print("Delete chat err:", e)
+        return False
+    finally:
+        conn.close()
 
 def join_chat(chat_id: str, username: str) -> bool:
     conn = get_connection()
