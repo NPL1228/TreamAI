@@ -218,11 +218,11 @@ export default function ChatInfo({ user }) {
         {/* Members Section */}
         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '30px', borderRadius: '16px' }}>
           <h2 style={{ fontSize: '1.4rem', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Users size={24} color="var(--primary)" /> Members ({chatInfo.members?.length || 0})
+            <Users size={24} color="var(--primary)" /> Members ({chatInfo.members?.filter(m => m.role !== 'left').length || 0})
           </h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {chatInfo.members?.map((member, idx) => (
+            {chatInfo.members?.filter(m => m.role !== 'left').map((member, idx) => (
               <div key={idx} style={{ padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : (member.color || 'var(--text)') }}>
                     {nicknames[member.username] || member.username} {member.username === user && '(You)'}
