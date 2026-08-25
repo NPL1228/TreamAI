@@ -465,8 +465,12 @@ def remove_friend(user1: str, user2: str) -> bool:
     conn = get_connection()
     try:
         conn.execute("""
-            DELETE FROM Friendships
+            DELETE FROM Friendships 
             WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?)
+        """, (user1, user2, user2, user1))
+        conn.execute("""
+            DELETE FROM Friend_Nicknames 
+            WHERE (user_name = ? AND friend_name = ?) OR (user_name = ? AND friend_name = ?)
         """, (user1, user2, user2, user1))
         conn.commit()
         return True
