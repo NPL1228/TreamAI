@@ -111,6 +111,11 @@ def init_db():
         cursor.execute("UPDATE Chat_Members SET last_read = CURRENT_TIMESTAMP")
     except sqlite3.OperationalError:
         pass # Column already exists
+        
+    try:
+        cursor.execute("ALTER TABLE Chat_Members ADD COLUMN left_at TIMESTAMP")
+    except sqlite3.OperationalError:
+        pass # Column already exists
 
     conn.commit()
     conn.close()
