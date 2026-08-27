@@ -211,16 +211,29 @@ def get_weights(chat_id: str, project_id: str = None):
     return {"w1": 0.40, "w2": 0.35, "w3": 0.25, "alpha": 0.90}
 
 
-def update_weights(chat_id: str, w1: float, w2: float, w3: float,
-                   project_id: str = None):
+def update_weights(chat_id: str, w1: float, w2: float, w3: float, project_id: str = None):
     conn = get_connection()
-    conn.execute("""
-        INSERT INTO Weights (chat_id, project_id, w1, w2, w3)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(chat_id, project_id)
-        DO UPDATE SET w1=excluded.w1, w2=excluded.w2,
-                      w3=excluded.w3, updated_at=CURRENT_TIMESTAMP
-    """, (chat_id, project_id, w1, w2, w3))
+    cursor = conn.cursor()
+    
+    if project_id is None:
+        cursor.execute("SELECT id FROM Weights WHERE chat_id = ? AND project_id IS NULL", (chat_id,))
+    else:
+        cursor.execute("SELECT id FROM Weights WHERE chat_id = ? AND project_id = ?", (chat_id, project_id))
+        
+    row = cursor.fetchone()
+    
+    if row:
+        cursor.execute("""
+            UPDATE Weights 
+            SET w1=?, w2=?, w3=?, updated_at=CURRENT_TIMESTAMP 
+            WHERE id=?
+        """, (w1, w2, w3, row[0]))
+    else:
+        cursor.execute("""
+            INSERT INTO Weights (chat_id, project_id, w1, w2, w3)
+            VALUES (?, ?, ?, ?, ?)
+        """, (chat_id, project_id, w1, w2, w3))
+        
     conn.commit()
     conn.close()
 

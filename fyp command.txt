@@ -11,3 +11,7 @@ ngrok http 8443
 View Database:
 python view_sqlite.py
 C:\Users\Gigabyte\AppData\Local\Programs\Python\Python310\python.exe view_chroma.py
+
+Run agent in oracle:
+screen -r treamai 
+nohup uvicorn main:app --host 0.0.0.0 --port 8000 > backlog.txt 2>&1 &
