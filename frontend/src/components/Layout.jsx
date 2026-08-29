@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { MessageSquare, Users, LogOut, Settings, Hash, Bell } from 'lucide-react';
+import { MessageSquare, Users, LogOut, Settings, Hash, Bell, Bot } from 'lucide-react';
 
 export default function Layout({ user, onLogout, children }) {
   const navigate = useNavigate();
@@ -108,8 +108,7 @@ export default function Layout({ user, onLogout, children }) {
   const privateChats = chats.filter(c => c.chat_type === 'private');
   
   const agentChat = privateChats.find(c => c.chat_name === 'TreamAI Agent');
-  const otherPrivateChats = privateChats.filter(c => c.chat_name !== 'TreamAI Agent').slice(0, 3);
-  const displayPrivateChats = agentChat ? [agentChat, ...otherPrivateChats] : otherPrivateChats.slice(0, 4);
+  const displayPrivateChats = privateChats.filter(c => c.chat_name !== 'TreamAI Agent').slice(0, 4);
 
   const displayTeamChats = teamChats.slice(0, 3);
 
@@ -184,6 +183,38 @@ export default function Layout({ user, onLogout, children }) {
           {/* Scrollable Lists */}
           <div className="custom-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
             
+            {/* Agent Section */}
+            {agentChat && (
+              <div>
+                <h3 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px', letterSpacing: '0.5px' }}>AI Agent</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div 
+                    onClick={() => handleNavigate(`/chat/${agentChat.chat_id}`)}
+                    style={{ 
+                      padding: '8px 12px', 
+                      borderRadius: '8px', 
+                      cursor: 'pointer',
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '10px',
+                      background: location.pathname === `/chat/${agentChat.chat_id}` ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                      color: location.pathname === `/chat/${agentChat.chat_id}` ? 'white' : 'var(--text-main)',
+                      position: 'relative'
+                    }}
+                    className="hover-bg"
+                  >
+                    <Bot size={16} color={location.pathname === `/chat/${agentChat.chat_id}` ? "var(--primary)" : "var(--text-muted)"} />
+                    <span style={{ fontSize: '0.95rem', fontWeight: '600' }}>{agentChat.chat_name}</span>
+                    {agentChat.unread > 0 && (
+                      <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
+                        {agentChat.unread > 99 ? '99+' : agentChat.unread}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Private Chats Section */}
             <div>
               <h3 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px', letterSpacing: '0.5px' }}>Private Chats</h3>
@@ -206,7 +237,7 @@ export default function Layout({ user, onLogout, children }) {
                     className="hover-bg"
                   >
                     <MessageSquare size={16} color={location.pathname === `/chat/${chat.chat_id}` ? "var(--primary)" : "var(--text-muted)"} />
-                    <span style={{ fontSize: '0.95rem', fontWeight: chat.chat_name === 'TreamAI Agent' ? '600' : 'normal' }}>{chat.chat_name}</span>
+                    <span style={{ fontSize: '0.95rem' }}>{chat.chat_name}</span>
                     {chat.unread > 0 && (
                       <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
                         {chat.unread > 99 ? '99+' : chat.unread}

@@ -14,4 +14,5 @@ C:\Users\Gigabyte\AppData\Local\Programs\Python\Python310\python.exe view_chroma
 
 Run agent in oracle:
 screen -r treamai 
-nohup uvicorn main:app --host 0.0.0.0 --port 8000 > backlog.txt 2>&1 &
+pkill -f uvicorn
+nohup ./venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000 --ssl-keyfile private.key --ssl-certfile cert.pem > backlog.txt 2>&1 &
