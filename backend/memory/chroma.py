@@ -82,3 +82,14 @@ def update_node_content(chat_id: str, node_id: str, new_content: str):
         )
         return True
     return False
+
+def get_all_nodes(chat_id: str):
+    """Retrieve all nodes for a specific chat for pruning analysis."""
+    collection = get_collection(chat_id)
+    return collection.get()
+
+def delete_nodes(chat_id: str, node_ids: list):
+    """Delete multiple nodes from ChromaDB."""
+    if not node_ids: return
+    collection = get_collection(chat_id)
+    collection.delete(ids=node_ids)

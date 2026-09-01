@@ -4,6 +4,7 @@ import traceback
 
 from memory import storage, chroma
 from llm import gemini
+from pipelines import pruning_pipeline
 
 # Number of buffered messages before summarization
 BUFFER_LIMIT = 5      # Change to 1 later if desired
@@ -25,7 +26,12 @@ def process_incoming_message(chat_id: str, message: str, user_name: str):
     print(f"Buffered messages: {len(messages)} / {BUFFER_LIMIT}")
 
     if len(messages) < BUFFER_LIMIT:
-        return None
+    
+
+
+    
+    return None
+
 
     try:
         return summarize_and_store(chat_id, messages)
@@ -84,6 +90,8 @@ def summarize_and_store(chat_id: str, messages: list):
         suggested = result.get("suggested_name") or "New Project"
         
         print(f"Summarization took {time.time() - start_time:.2f}s")
+        
+        pruning_pipeline.trigger_pruning_check(chat_id)
 
         return {
             "text": f"It looks like you're discussing a new project. Should I create **{suggested}** as a new project?\n\n[[Yes|?ACTION:create_project:{suggested}]] [[No|?ACTION:ignore_project]]"
@@ -91,6 +99,8 @@ def summarize_and_store(chat_id: str, messages: list):
 
     print(f"Summarization took {time.time() - start_time:.2f}s")
     print("No new project detected.")
+    
+    pruning_pipeline.trigger_pruning_check(chat_id)
 
     return None
 

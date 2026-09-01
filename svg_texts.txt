@@ -1,0 +1,49 @@
+React frontend
+Team space
+Private DM
+WebSocket
+FastAPI backend
+@agent detected?
+No
+Yes
+Storage pipeline
+Buffer message
+SQLite Message_Buffer
+N messages reached?
+Count per chat
+LLM classify + summarize
+Group by project + type
+Return structured JSON
+Entity matching
+Assign project via ChromaDB search
+Store nodes in ChromaDB
+content + embedding + metadata
+Retrieval pipeline
+Extract query
+Strip @agent trigger
+Multi-path retrieval
+Semantic · recency
+frequency · chat-level
+Merge + deduplicate
+Candidates from all paths
+Composite scoring
+w1·semantic + w2·recency
++ w3·frequency
+Top-K → LLM response
+Gemini generates answer
+Self-adaptive layer
+Adaptive pruning
+prune_score = age × (1/count)
+keep · consolidate · discard
+Adaptive weights
+LLM cites USED:[ids]
+EMA updates w1 w2 w3
+Self-evaluation
+2nd LLM call rates 1–5
+feedback signal per path
+SQLite
+users · chats · projects · weights
+messages · buffer · friendships
+ChromaDB
+memory nodes + embeddings
+chat-level · project-level pools
