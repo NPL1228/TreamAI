@@ -170,7 +170,7 @@ export default function FriendsList({ user }) {
   const filteredFriends = friends.filter(f => f.username.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '25px 20px 20px 20px' : '40px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '25px 20px 20px 20px' : '40px', maxWidth: '1000px', margin: '0 auto', minHeight: '100%' }}>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -185,11 +185,11 @@ export default function FriendsList({ user }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: isMobile ? 'none' : '0 0 350px', width: isMobile ? '100%' : 'auto' }}>
           <div className="glass-panel animate-fade-in" style={{ padding: '30px' }}>
             <h2 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <UserPlus size={20} color="#10b981" /> Add a Friend
+              <UserPlus size={20} color="var(--primary)" /> Add a Friend
             </h2>
             <form onSubmit={handleSendFriendRequest} style={{ display: 'flex', gap: '10px' }}>
               <input type="text" className="input-field" placeholder="Username" value={friendUsername} onChange={(e) => setFriendUsername(e.target.value)} required />
-              <button type="submit" className="btn-primary" style={{ background: '#10b981' }}>Add</button>
+              <button type="submit" className="btn-primary">Add</button>
             </form>
             {friendStatus && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '8px' }}>{friendStatus}</p>}
           </div>
@@ -214,7 +214,7 @@ export default function FriendsList({ user }) {
         </div>
 
         {/* Right Column */}
-        <div className="glass-panel animate-fade-in" style={{ padding: '30px', flex: 1, animationDelay: '0.2s', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <div className="glass-panel animate-fade-in" style={{ padding: '30px', flex: 1, animationDelay: '0.2s', display: 'flex', flexDirection: 'column', minWidth: 0, marginBottom: '20px' }}>
           <div style={{ 
             display: 'flex', 
             flexDirection: isMobile ? 'column' : 'row', 

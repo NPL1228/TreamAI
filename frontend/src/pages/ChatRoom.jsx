@@ -20,8 +20,13 @@ export default function ChatRoom({ user }) {
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+      if (!input) {
+        textareaRef.current.style.height = '48px';
+      } else {
+        textareaRef.current.style.height = '48px';
+        const scrollHeight = textareaRef.current.scrollHeight;
+        textareaRef.current.style.height = Math.min(Math.max(scrollHeight, 48), 120) + 'px';
+      }
     }
   }, [input]);
 

@@ -179,7 +179,7 @@ export default function Dashboard({ user, onLogout }) {
           {/* Friends Management */}
           <div className="glass-panel animate-fade-in" style={{ padding: '30px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-              <div style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', color: '#10b981' }}>
+              <div style={{ padding: '12px', background: 'rgba(99, 102, 241, 0.2)', borderRadius: '12px', color: 'var(--primary)' }}>
                 <UserPlus size={24} />
               </div>
               <h2>Friends</h2>
@@ -189,7 +189,7 @@ export default function Dashboard({ user, onLogout }) {
               <h3 style={{ fontSize: '1rem', marginBottom: '10px' }}>Add Friend</h3>
               <form onSubmit={handleSendFriendRequest} style={{ display: 'flex', gap: '10px' }}>
                 <input type="text" className="input-field" placeholder="Username" value={friendUsername} onChange={(e) => setFriendUsername(e.target.value)} required />
-                <button type="submit" className="btn-primary" style={{ background: isAddingFriend ? 'var(--text-muted)' : '#10b981' }} disabled={isAddingFriend}>
+                <button type="submit" className="btn-primary" style={isAddingFriend ? { background: 'var(--text-muted)' } : {}} disabled={isAddingFriend}>
                   {isAddingFriend ? '...' : 'Add'}
                 </button>
               </form>
