@@ -183,7 +183,7 @@ export default function ChatRoom({ user }) {
       
       <header style={{ padding: isMobile ? '60px 10px 15px 10px' : '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '20px' }}>
-          <button onClick={() => navigate('/dashboard')} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>
+          <button onClick={() => navigate('/dashboard')} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}>
             <ArrowLeft size={24} />
           </button>
           <div>
@@ -193,9 +193,9 @@ export default function ChatRoom({ user }) {
         <button 
           onClick={() => navigate(`/chat/${chatId}/info`)}
           style={{ 
-            background: 'rgba(255, 255, 255, 0.1)', 
+            background: 'var(--input-bg)', 
             border: 'none', 
-            color: 'white', 
+            color: 'var(--text-main)', 
             cursor: 'pointer', 
             borderRadius: '50%', 
             width: '40px', 
@@ -203,10 +203,9 @@ export default function ChatRoom({ user }) {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            transition: 'background 0.2s'
+            transition: 'background 0.2s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+          className="hover-bg"
         >
           <Info size={20} />
         </button>
@@ -236,7 +235,7 @@ export default function ChatRoom({ user }) {
             if (msg.sender === 'system') {
               return (
                 <div key={idx} style={{ textAlign: 'center', margin: '15px 0' }}>
-                  <span style={{ background: 'rgba(255,255,255,0.1)', padding: '5px 12px', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  <span style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '5px 12px', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                     {msg.text}
                   </span>
                 </div>
@@ -260,7 +259,7 @@ export default function ChatRoom({ user }) {
                   background: isMe ? 'linear-gradient(135deg, var(--primary), var(--secondary))' : 
                              (isAgent ? 'rgba(99, 102, 241, 0.1)' : 'var(--input-bg)'),
                   border: isAgent ? '1px solid var(--secondary)' : '1px solid var(--border)',
-                  color: (isMe || isAgent) ? 'white' : 'var(--text-main)',
+                  color: (isMe || isAgent) ? 'var(--text-main)' : 'var(--text-main)',
                   borderBottomRightRadius: isMe ? '4px' : '16px',
                   borderBottomLeftRadius: !isMe ? '4px' : '16px',
                   boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
@@ -268,9 +267,9 @@ export default function ChatRoom({ user }) {
                   whiteSpace: 'pre-wrap'
                 }}>
                   {/* Render the sender name inside the bubble */}
-                  {!isMe && !isAgent && (
+                  {!isMe && (
                     <div style={{ fontSize: '0.75rem', color: msg.color || 'var(--primary)', marginBottom: '6px', fontWeight: 'bold' }}>
-                      {nicknames[msg.sender] || msg.sender}
+                      {isAgent ? 'TreamAI Agent' : (nicknames[msg.sender] || msg.sender)}
                     </div>
                   )}
                   {(() => {
@@ -293,13 +292,13 @@ export default function ChatRoom({ user }) {
                               display: 'inline-block',
                               margin: '4px',
                               padding: '6px 12px',
-                              background: 'rgba(255,255,255,0.15)',
-                              border: '1px solid rgba(255,255,255,0.3)',
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border)',
                               borderRadius: '6px',
-                              color: 'white',
+                              color: 'var(--text-main)',
                               cursor: 'pointer',
                               fontSize: '0.85rem',
-                              transition: 'all 0.2s'
+                              transition: 'background 0.2s'
                             }}
                           >
                             {match[1]}
@@ -346,7 +345,7 @@ export default function ChatRoom({ user }) {
                 borderRadius: '16px',
                 background: 'rgba(99, 102, 241, 0.1)',
                 border: '1px solid var(--secondary)',
-                color: 'white',
+                color: 'var(--text-main)',
                 borderBottomRightRadius: '16px',
                 borderBottomLeftRadius: '4px',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
@@ -378,7 +377,7 @@ export default function ChatRoom({ user }) {
             <form onSubmit={sendMessage} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {/* File preview banner */}
               {fileUpload && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'rgba(255,255,255,0.06)', borderRadius: '10px', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '10px', fontSize: '0.85rem' }}>
                   {fileUpload.error ? (
                     <span style={{ color: '#ff6b6b', flex: 1 }}>{fileUpload.error}</span>
                   ) : fileUpload.previewUrl ? (
@@ -397,7 +396,7 @@ export default function ChatRoom({ user }) {
                 {/* Hidden file input */}
                 <input ref={fileInputRef} type="file" accept=".pdf,.docx,.xlsx,.pptx,.txt,.csv,.zip,.png,.jpg,.jpeg" style={{ display: 'none' }} onChange={handleFileSelect} />
                 {/* Paperclip button */}
-                <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white', flexShrink: 0 }}>
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="hover-bg" style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-main)', flexShrink: 0 }}>
                   <Paperclip size={20} />
                 </button>
                 <textarea

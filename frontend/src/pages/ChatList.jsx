@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, MessageSquare, Hash, MoreVertical, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Search, MessageSquare, Hash, MoreVertical, Trash2, X, LogOut } from 'lucide-react';
 
 export default function ChatList({ user, type }) {
   const navigate = useNavigate();
@@ -153,8 +153,8 @@ export default function ChatList({ user, type }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: chat.chat_name === 'TreamAI Agent' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                border: chat.chat_name === 'TreamAI Agent' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent'
+                background: chat.chat_name === 'TreamAI Agent' ? 'rgba(99, 102, 241, 0.15)' : 'var(--input-bg)',
+                border: chat.chat_name === 'TreamAI Agent' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid var(--border)'
               }}
               className="hover-bg"
             >
@@ -198,7 +198,7 @@ export default function ChatList({ user, type }) {
                       position: 'absolute', 
                       right: 0, 
                       top: '35px',
-                      background: '#1f2229', 
+                      background: 'var(--popup-bg)', 
                       border: '1px solid var(--border)', 
                       borderRadius: '8px', 
                       padding: '5px', 
@@ -206,29 +206,21 @@ export default function ChatList({ user, type }) {
                       width: '120px', 
                       boxShadow: '0 4px 12px rgba(0,0,0,0.5)' 
                     }}>
-                      {type === 'team' && chat.role !== 'left' ? (
+                      {chat.role === 'left' ? (
                         <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setConfirmDelete({ id: chat.chat_id, action: 'leave' }); 
-                            setActiveMenu(null); 
-                          }}
-                          style={{ width: '100%', background: 'transparent', border: 'none', color: '#f59e0b', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
-                          className="hover-bg"
-                        >
-                          Leave
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setConfirmDelete({ id: chat.chat_id, action: 'delete' }); 
-                            setActiveMenu(null); 
-                          }}
+                          onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: chat.chat_id, action: 'delete' }); setActiveMenu(null); }}
                           style={{ width: '100%', background: 'transparent', border: 'none', color: '#ef4444', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
                           className="hover-bg"
                         >
                           <Trash2 size={16} /> Delete
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: chat.chat_id, action: 'leave' }); setActiveMenu(null); }}
+                          style={{ width: '100%', background: 'transparent', border: 'none', color: '#f59e0b', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                          className="hover-bg"
+                        >
+                          <LogOut size={16} /> Leave
                         </button>
                       )}
                     </div>
@@ -239,7 +231,7 @@ export default function ChatList({ user, type }) {
             </div>
           ))}
           {filteredChats.length === 0 && (
-            <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '20px' }}>No chats found.</p>
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '20px' }}>No chats found.</p>
           )}
         </div>
       </div>
@@ -253,11 +245,11 @@ export default function ChatList({ user, type }) {
             <h2 style={{ margin: '0 0 15px 0', fontSize: '1.4rem' }}>{confirmDelete.action === 'leave' ? 'Leave Chat?' : 'Delete Chat?'}</h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '25px', lineHeight: '1.5' }}>
               {confirmDelete.action === 'leave' 
-                ? "Are you sure you want to leave this team chat? You won't be able to send new messages." 
-                : "Are you sure you want to permanently remove this chat from your list? This action cannot be undone."}
+                ? "You will no longer receive messages from this chat. Another owner can add you back." 
+                : "This action cannot be undone. All your history in this chat will be removed."}
             </p>
-            <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setConfirmDelete(null)} style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmDelete(null)} style={{ background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
               <button 
                 disabled={isDeleting} 
                 onClick={() => confirmDelete.action === 'leave' ? handleLeaveChat(confirmDelete.id) : handleDeleteChat(confirmDelete.id)} 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Info, Users, Hash, Edit3, Check, X, Copy } from 'lucide-react';
+import { ArrowLeft, Info, Users, Hash, Edit3, Check, X, Copy, Bot, MessageSquare } from 'lucide-react';
 
 export default function ChatInfo({ user }) {
   const { chatId } = useParams();
@@ -100,135 +100,146 @@ export default function ChatInfo({ user }) {
     }
   };
 
-  if (loading) return <div style={{ padding: '40px', color: 'white' }}>Loading...</div>;
-  if (!chatInfo) return <div style={{ padding: '40px', color: 'white' }}>Chat not found</div>;
+  if (loading) return <div style={{ padding: '40px', color: 'var(--text-main)' }}>Loading...</div>;
+  if (!chatInfo) return <div style={{ padding: '40px', color: 'var(--text-main)' }}>Chat not found</div>;
+
+  const isOwner = chatInfo?.members?.find(m => m.username === user)?.role === 'owner';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '60px 20px 20px 20px' : '40px', maxWidth: '800px', margin: '0 auto', height: '100%', overflowY: 'auto' }}>
+    <div style={{ padding: isMobile ? '20px 15px' : '40px', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
           <ArrowLeft size={24} />
         </button>
-        <h1 style={{ fontSize: isMobile ? '1.3rem' : '1.5rem', margin: 0 }}>Chat Information</h1>
+        <h1 style={{ fontSize: '2rem', margin: 0 }}>Chat Info</h1>
       </div>
 
-      <div className="animate-fade-in" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div className="glass-panel animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
         
-        {/* Basic Info Section */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', padding: isMobile ? '20px' : '30px', borderRadius: '16px' }}>
+        {/* Header Section */}
+        <div style={{ background: 'var(--input-bg)', padding: isMobile ? '20px' : '30px', borderRadius: '16px' }}>
           <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: '15px', marginBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', width: '100%' }}>
-              <div style={{ background: 'rgba(99, 102, 241, 0.15)', padding: '15px', borderRadius: '50%', color: 'var(--primary)' }}>
-                <Info size={28} />
+              <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {chatInfo.chat_type === 'private' ? <MessageSquare size={32} color="white" /> : <Hash size={32} color="white" />}
               </div>
               <div style={{ flex: 1 }}>
-                <h2 style={{ fontSize: isMobile ? '1.4rem' : '1.8rem', margin: 0, fontWeight: 'bold', wordBreak: 'break-word' }}>{chatInfo.chat_name}</h2>
-                {chatInfo.chat_type !== 'private' && (
-                  <p style={{ color: 'var(--text-muted)', margin: '5px 0 0 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Hash size={14} /> Code: <span style={{ color: 'white', fontWeight: 'bold', letterSpacing: '1px' }}>{chatInfo.chat_id}</span>
+                <h2 style={{ margin: 0, fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {chatInfo.chat_name}
+                  <span style={{ fontSize: '0.8rem', padding: '2px 8px', background: 'rgba(99, 102, 241, 0.2)', color: 'var(--primary)', borderRadius: '10px', textTransform: 'capitalize' }}>
+                    {chatInfo.chat_type}
+                  </span>
+                </h2>
+                {chatInfo.chat_type === 'team' && (
+                  <p style={{ margin: '5px 0 0 0', color: 'var(--text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Hash size={14} /> Code: <span style={{ color: 'var(--text-main)', fontWeight: 'bold', letterSpacing: '1px' }}>{chatInfo.chat_id}</span>
                   </p>
                 )}
               </div>
             </div>
             
-            {chatInfo.chat_type !== 'private' && (
+            {chatInfo.chat_type === 'team' && (
               <button 
                 onClick={handleCopy}
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: copied ? '#10b981' : 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', transition: 'all 0.2s', alignSelf: isMobile ? 'flex-start' : 'auto', marginTop: isMobile ? '10px' : '0' }}
+                style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: copied ? '#10b981' : 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', transition: 'background 0.2s', alignSelf: isMobile ? 'flex-start' : 'auto', marginTop: isMobile ? '10px' : '0' }}
                 className="hover-bg"
               >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                <span>{copied ? 'Copied' : 'Copy Code'}</span>
+                {copied ? <Check size={18} /> : <Copy size={18} />}
+                {copied ? 'Copied' : 'Invite'}
               </button>
             )}
           </div>
-          
-          <div style={{ marginTop: '30px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-muted)' }}>Description</h3>
-              {!isEditingDesc && (
-                <button 
-                  onClick={() => setIsEditingDesc(true)}
-                  style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
-                >
-                  <Edit3 size={16} /> Edit
-                </button>
-              )}
-            </div>
-            
+
+          <div style={{ padding: '20px', background: 'var(--bg-dark)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: '1rem', margin: '0 0 10px 0', color: 'var(--text-muted)' }}>Description</h3>
             {isEditingDesc ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
                 <textarea 
                   className="input-field" 
-                  value={editDescValue}
-                  onChange={e => setEditDescValue(e.target.value)}
+                  value={editDescValue} 
+                  onChange={(e) => setEditDescValue(e.target.value)} 
+                  rows={3} 
+                  style={{ marginBottom: '10px', resize: 'vertical' }}
                   placeholder="Add a description for this chat..."
-                  style={{ minHeight: '100px', resize: 'vertical' }}
                 />
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                  <button onClick={() => { setIsEditingDesc(false); setEditDescValue(chatInfo.description || ''); }} className="btn-secondary" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <X size={16} /> Cancel
-                  </button>
-                  <button onClick={handleSaveDescription} className="btn-primary" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Check size={16} /> Save
-                  </button>
+                  <button onClick={() => { setIsEditingDesc(false); setEditDescValue(chatInfo.description || ''); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px 15px' }}>Cancel</button>
+                  <button onClick={handleSaveDescription} className="btn-primary" style={{ padding: '8px 15px' }}>Save</button>
                 </div>
               </div>
             ) : (
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '8px', minHeight: '80px', color: chatInfo.description ? 'var(--text)' : 'var(--text-muted)' }}>
-                {chatInfo.description || "No description provided."}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px' }}>
+                <p style={{ margin: 0, color: chatInfo.description ? 'var(--text-main)' : 'var(--text-muted)', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                  {chatInfo.description || 'No description provided.'}
+                </p>
+                {isOwner && (
+                  <button onClick={() => setIsEditingDesc(true)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', padding: '5px' }}>
+                    <Edit3 size={16} /> Edit
+                  </button>
+                )}
               </div>
             )}
           </div>
-
-          <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-            <div>
-              <h3 style={{ fontSize: '1.1rem', margin: '0 0 5px 0' }}>AI Agent Listening</h3>
-              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>When enabled, TreamAI will listen to generate memories and assist you.</p>
-            </div>
-            
-            {/* Custom Toggle Switch */}
-            <div 
-              onClick={handleToggleAI}
-              style={{ 
-                width: isMobile ? '80px' : '40px', 
-                height: '26px', 
-                background: aiListening ? 'var(--primary)' : 'rgba(255,255,255,0.1)', 
-                borderRadius: '13px',
-                position: 'relative',
-                cursor: 'pointer',
-                transition: 'all 0.3s'
-              }}
-            >
-              <div style={{
-                width: '22px',
-                height: '22px',
-                background: 'white',
-                borderRadius: '50%',
-                position: 'absolute',
-                top: '2px',
-                left: aiListening ? '20px' : '2px',
-                transition: 'all 0.3s'
-              }} />
-            </div>
-          </div>
         </div>
 
+        {/* AI Agent Toggles */}
+        {chatInfo.chat_type === 'team' && isOwner && (
+          <div style={{ padding: '0 30px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', background: 'var(--input-bg)', border: '1px solid var(--primary)', borderRadius: '12px', boxShadow: '0 0 15px var(--primary-glow)' }}>
+              <div>
+                <h3 style={{ margin: '0 0 5px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Bot size={20} color="var(--primary)" /> TreamAI Agent
+                </h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  Allow the AI agent to listen and respond in this team.
+                </p>
+              </div>
+              <button 
+                onClick={handleToggleAI}
+                style={{ 
+                  width: '50px', 
+                  height: '26px', 
+                  background: aiListening ? 'var(--primary)' : 'var(--border)', 
+                  borderRadius: '13px',
+                  position: 'relative',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s'
+                }}
+              >
+                <div style={{ 
+                  width: '20px', 
+                  height: '20px', 
+                  background: 'white',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  top: '3px',
+                  left: aiListening ? '27px' : '3px',
+                  transition: 'left 0.3s'
+                }} />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Members Section */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '30px', borderRadius: '16px' }}>
+        <div style={{ background: 'var(--input-bg)', padding: '30px', borderRadius: '16px' }}>
           <h2 style={{ fontSize: '1.4rem', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Users size={24} color="var(--primary)" /> Members ({chatInfo.members?.filter(m => m.role !== 'left').length || 0})
           </h2>
-          
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {chatInfo.members?.filter(m => m.role !== 'left').map((member, idx) => (
-              <div key={idx} style={{ padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : (member.color || 'var(--text)') }}>
+              <div key={idx} style={{ padding: '15px', background: 'var(--bg-dark)', border: '1px solid var(--border)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.color || 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                    {member.username === 'TreamAI Agent' ? <Bot size={20} /> : member.username.charAt(0).toUpperCase()}
+                  </div>
+                  <span style={{ fontSize: '1.1rem', fontWeight: member.username === user ? 'bold' : 'normal', color: member.username === 'TreamAI Agent' ? 'var(--primary)' : 'var(--text-main)' }}>
                     {nicknames[member.username] || member.username} {member.username === user && '(You)'}
-                    {nicknames[member.username] && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '8px' }}>({member.username})</span>}
                   </span>
-                <span style={{ fontSize: '0.85rem', padding: '4px 12px', background: member.role === 'owner' ? 'rgba(234, 179, 8, 0.2)' : 'rgba(255,255,255,0.1)', color: member.role === 'owner' ? '#eab308' : 'var(--text-muted)', borderRadius: '20px', textTransform: 'capitalize' }}>
+                </div>
+                <span style={{ fontSize: '0.85rem', padding: '4px 12px', background: member.role === 'owner' ? 'rgba(234, 179, 8, 0.2)' : 'var(--input-bg)', color: member.role === 'owner' ? '#eab308' : 'var(--text-muted)', borderRadius: '20px', textTransform: 'capitalize' }}>
                   {member.role}
                 </span>
               </div>
