@@ -122,6 +122,16 @@ def init_db():
     except sqlite3.OperationalError:
         pass # Column already exists
 
+    try:
+        cursor.execute("ALTER TABLE Messages ADD COLUMN file_url TEXT")
+    except sqlite3.OperationalError:
+        pass # Column already exists
+
+    try:
+        cursor.execute("ALTER TABLE Messages ADD COLUMN file_name TEXT")
+    except sqlite3.OperationalError:
+        pass # Column already exists
+
     conn.commit()
     conn.close()
 
@@ -289,12 +299,12 @@ def clear_buffer(chat_id: str):
     conn.commit()
     conn.close()
 
-def save_message(chat_id: str, sender: str, text: str):
+def save_message(chat_id: str, sender: str, text: str, file_url: str = None, file_name: str = None):
     conn = get_connection()
     conn.execute("""
-        INSERT INTO Messages (chat_id, sender, text)
-        VALUES (?, ?, ?)
-    """, (chat_id, sender, text))
+        INSERT INTO Messages (chat_id, sender, text, file_url, file_name)
+        VALUES (?, ?, ?, ?, ?)
+    """, (chat_id, sender, text, file_url, file_name))
     conn.commit()
     conn.close()
 
@@ -327,14 +337,14 @@ def get_chat_history(chat_id: str, limit: int = 50, username: str = None):
             
     if left_at:
         cursor.execute("""
-            SELECT sender, text, timestamp FROM Messages 
+            SELECT sender, text, timestamp, file_url, file_name FROM Messages 
             WHERE chat_id = ? AND timestamp <= ?
             ORDER BY timestamp DESC 
             LIMIT ?
         """, (chat_id, left_at, limit))
     else:
         cursor.execute("""
-            SELECT sender, text, timestamp FROM Messages 
+            SELECT sender, text, timestamp, file_url, file_name FROM Messages 
             WHERE chat_id = ?
             ORDER BY timestamp DESC 
             LIMIT ?
@@ -345,7 +355,7 @@ def get_chat_history(chat_id: str, limit: int = 50, username: str = None):
     
     # Reverse to return them in chronological order
     rows.reverse()
-    return [{"sender": r[0], "text": r[1], "timestamp": r[2], "color": get_user_color(chat_id, r[0])} for r in rows]
+    return [{"sender": r[0], "text": r[1], "timestamp": r[2], "color": get_user_color(chat_id, r[0]), "file_url": r[3], "file_name": r[4]} for r in rows]
 
 def create_notification(username: str, title: str, message: str):
     conn = get_connection()

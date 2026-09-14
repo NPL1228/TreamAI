@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Bell, Shield, Palette } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export default function Settings({ user, onUserUpdate }) {
+export default function Settings({ user, onUserUpdate, theme, setTheme }) {
   const navigate = useNavigate();
   const [newUsername, setNewUsername] = useState(user || '');
   const [email, setEmail] = useState('');
@@ -110,7 +110,43 @@ export default function Settings({ user, onUserUpdate }) {
           <Palette size={24} color="var(--secondary)" />
           <h2 style={{ margin: 0 }}>Appearance</h2>
         </div>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Theme customization coming soon!</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+          {/* Bright Theme Card */}
+          <div 
+            onClick={() => setTheme('bright')}
+            style={{ 
+              border: theme === 'bright' ? '2px solid var(--primary)' : '1px solid var(--border)', 
+              borderRadius: '12px', 
+              padding: '20px', 
+              cursor: 'pointer', 
+              background: 'rgba(255, 255, 255, 0.85)',
+              color: '#1f2937',
+              transition: 'all 0.2s ease',
+              opacity: theme === 'bright' ? 1 : 0.7
+            }}
+          >
+            <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Bright Theme</div>
+            <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>Clean, white layout with pale purple accents.</div>
+          </div>
+
+          {/* Dark Theme Card */}
+          <div 
+            onClick={() => setTheme('dark')}
+            style={{ 
+              border: theme === 'dark' ? '2px solid var(--primary)' : '1px solid var(--border)', 
+              borderRadius: '12px', 
+              padding: '20px', 
+              cursor: 'pointer', 
+              background: '#0f1115',
+              color: '#f3f4f6',
+              transition: 'all 0.2s ease',
+              opacity: theme === 'dark' ? 1 : 0.7
+            }}
+          >
+            <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Dark Theme</div>
+            <div style={{ fontSize: '0.85rem', color: '#9ca3af' }}>Deep contrasts optimized for low light.</div>
+          </div>
+        </div>
       </div>
 
       <div className="glass-panel animate-fade-in" style={{ padding: '30px', animationDelay: '0.2s' }}>

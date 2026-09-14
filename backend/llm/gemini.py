@@ -22,6 +22,32 @@ def get_client():
 
     return _client
 
+def classify_team_query(query: str) -> str:
+    """Orchestration layer to identify the purpose of an @agent query."""
+    client = get_client()
+    prompt = f"""
+    Analyze the user's query and classify its intent into exactly ONE of these categories:
+    1. "retrieval" - Asking about past project details, decisions, facts, or team memories.
+    2. "summarization" - Asking to summarize the recent conversation, catch up, or recap current chat context.
+    3. "general_qa" - A general knowledge question, coding question, or casual chat that does NOT require team memory.
+
+    Query: "{query}"
+
+    Return ONLY a raw JSON object:
+    {{"intent": "retrieval|summarization|general_qa"}}
+    """
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(response_mime_type="application/json")
+        )
+        data = json.loads(response.text)
+        return data.get("intent", "retrieval")
+    except Exception as e:
+        print(f"Orchestration error: {e}")
+        return "retrieval"
+
 def summarize_messages(messages, current_projects):
 
     client = get_client()

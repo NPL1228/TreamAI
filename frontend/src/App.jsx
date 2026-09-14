@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -18,6 +18,12 @@ import './index.css';
 
 function App() {
   const [user, setUser] = useState(() => localStorage.getItem('treamai_user'));
+  const [theme, setTheme] = useState(() => localStorage.getItem('treamai_theme') || 'bright');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('treamai_theme', theme);
+  }, [theme]);
 
   const handleLogin = (username) => {
     localStorage.setItem('treamai_user', username);
@@ -54,7 +60,7 @@ function App() {
         />
         <Route 
           path="/settings" 
-          element={user ? <Layout user={user} onLogout={handleLogout}><Settings user={user} onUserUpdate={setUser} /></Layout> : <Navigate to="/login" />} 
+          element={user ? <Layout user={user} onLogout={handleLogout}><Settings user={user} onUserUpdate={setUser} theme={theme} setTheme={setTheme} /></Layout> : <Navigate to="/login" />} 
         />
         <Route 
           path="/notifications" 

@@ -1,4 +1,5 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, UploadFile, File
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from memory.storage import init_db, register_user, authenticate_user, get_user_by_email, store_reset_token, validate_reset_token, update_password, get_user_chats, get_chat, create_chat, join_chat, send_friend_request, accept_friend_request, remove_friend, get_pending_requests, get_friends, update_chat_activity, get_chat_info, update_chat_description, save_message, get_chat_history, create_notification, get_notifications, mark_notifications_read, update_ai_listening, update_username, mark_chat_read
@@ -59,6 +60,10 @@ class AiListeningReq(BaseModel):
 load_dotenv()
 
 app = FastAPI()
+
+# Serve uploaded files as static assets
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
@@ -424,6 +429,32 @@ async def api_mark_chat_read(chat_id: str, req: MarkReadReq):
     mark_chat_read(chat_id, req.username)
     return {"status": "success"}
 
+ALLOWED_EXTENSIONS = {".pdf", ".docx", ".xlsx", ".pptx", ".txt", ".csv", ".zip", ".png", ".jpg", ".jpeg"}
+MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+
+@app.post("/api/upload/{chat_id}")
+async def api_upload_file(chat_id: str, username: str, file: UploadFile = File(...)):
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"File type '{ext}' is not allowed.")
+
+    contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File exceeds the 25 MB size limit.")
+
+    upload_dir = f"uploads/{chat_id}"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    import uuid
+    safe_name = f"{uuid.uuid4().hex}{ext}"
+    file_path = f"{upload_dir}/{safe_name}"
+
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    file_url = f"/uploads/{chat_id}/{safe_name}"
+    return {"status": "success", "file_url": file_url, "file_name": file.filename}
+
 @app.websocket("/ws/global/{username}")
 async def global_websocket_endpoint(websocket: WebSocket, username: str):
     await manager.connect_global(websocket, username)
@@ -438,7 +469,18 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
     await manager.connect(websocket, chat_id)
     try:
         while True:
-            text = await websocket.receive_text()
+            raw = await websocket.receive_text()
+
+            # Support JSON payloads (file messages) or plain text
+            file_url = None
+            file_name = None
+            try:
+                payload = json.loads(raw)
+                text = payload.get("text", "")
+                file_url = payload.get("file_url")
+                file_name = payload.get("file_name")
+            except (json.JSONDecodeError, TypeError):
+                text = raw
             
             # Check if user is an active member
             from memory.storage import get_chat_info
@@ -456,13 +498,15 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
                 continue
 
             # Persist and broadcast the user's message
-            save_message(chat_id, username, text)
-            
+            save_message(chat_id, username, text, file_url=file_url, file_name=file_name)
+              
             from memory.storage import get_user_color
             user_msg = json.dumps({
                 "sender": username, 
                 "text": text,
-                "color": get_user_color(chat_id, username)
+                "color": get_user_color(chat_id, username),
+                "file_url": file_url,
+                "file_name": file_name
             })
             await manager.broadcast(user_msg, chat_id)
             

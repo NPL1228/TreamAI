@@ -1,0 +1,74 @@
+=== Users (1 rows) ===
+username | email | password_hash | created_at
+NPLyay | parklin051228@gmail.com | 9c0488ab8d26bfa69336ad9af43fe7fd33970edb16182a873ae3d7d3eb64c396 | 2026-08-15 01:19:42
+
+=== Password_Resets (0 rows) ===
+token | email | expires_at
+(empty)
+
+=== Chats (5 rows) ===
+chat_id | chat_name | chat_type | last_activity | created_at | description | ai_listening
+ai-NPLyay-8608 | TreamAI Agent | private | 2026-08-23 15:00:58 | 2026-08-15 01:19:42 | NULL | 1
+V8UIJ4O0 | Teamora Test | team | 2026-08-15 01:48:35 | 2026-08-15 01:48:28 | NULL | 1
+ONUC10Z3 | Team test 2 | team | 2026-08-15 01:50:23 | 2026-08-15 01:50:23 | NULL | 1
+X8PWCTTZ | 12344 | team | 2026-08-15 01:51:12 | 2026-08-15 01:51:12 | NULL | 1
+SLPERJB8 | trere | team | 2026-08-27 17:59:06 | 2026-08-15 01:51:16 | NULL | 1
+
+=== Friendships (2 rows) ===
+id | user1 | user2 | status | created_at
+1 | NPLyay | NPL | pending | 2026-08-24 01:20:43
+2 | NPLyay | ed | pending | 2026-08-24 01:22:50
+
+=== sqlite_sequence (3 rows) ===
+name | seq
+Message_Buffer | 4
+Messages | 13
+Friendships | 2
+
+=== Projects (0 rows) ===
+project_id | chat_id | name | status | created_at
+(empty)
+
+=== Chat_Members (6 rows) ===
+chat_id | user_name | role | joined_at | last_read | left_at | is_deleted
+ai-NPLyay-8608 | NPLyay | member | 2026-08-15 01:19:42 | 2026-08-27 18:04:08 | NULL | 0
+V8UIJ4O0 | NPLyay | owner | 2026-08-15 01:48:28 | 2026-08-23 16:38:32 | NULL | 0
+ONUC10Z3 | NPLyay | owner | 2026-08-15 01:50:23 | 2026-08-23 16:38:32 | NULL | 0
+X8PWCTTZ | NPLyay | owner | 2026-08-15 01:51:12 | 2026-08-23 16:38:32 | NULL | 0
+SLPERJB8 | NPLyay | owner | 2026-08-15 01:51:16 | 2026-08-27 17:59:06 | NULL | 0
+ai-NPLyay-8608 | TreamAI Agent | member | 2026-08-27 18:03:13 | NULL | NULL | 0
+
+=== Weights (0 rows) ===
+id | chat_id | project_id | w1 | w2 | w3 | alpha | updated_at
+(empty)
+
+=== Message_Buffer (4 rows) ===
+id | chat_id | message | user_name | timestamp
+1 | ai-NPLyay-8608 | Hi | NPLyay | 2026-08-15 01:41:20
+2 | V8UIJ4O0 | hi | NPLyay | 2026-08-15 01:48:35
+3 | SLPERJB8 | hi | NPLyay | 2026-08-15 02:29:31
+4 | SLPERJB8 | hi | NPLyay | 2026-08-27 17:59:06
+
+=== Messages (13 rows) ===
+id | chat_id | sender | text | timestamp
+1 | ai-NPLyay-8608 | NPLyay | vg | 2026-08-23 06:01:36
+2 | ai-NPLyay-8608 | TreamAI Agent | ⚠️ Internal server error. | 2026-08-23 06:01:43
+3 | ai-NPLyay-8608 | NPLyay | rg | 2026-08-23 06:01:43
+4 | ai-NPLyay-8608 | TreamAI Agent | Noted. | 2026-08-23 06:01:50
+5 | ai-NPLyay-8608 | NPLyay | hey | 2026-08-23 14:56:44
+6 | ai-NPLyay-8608 | TreamAI Agent | Hey there! How can I help you today? | 2026-08-23 14:56:50
+7 | ai-NPLyay-8608 | NPLyay | who are you | 2026-08-23 14:56:55
+8 | ai-NPLyay-8608 | TreamAI Agent | I am TreamAI, a helpful AI assistant! How can I assist you further? | 2026-08-23 14:56:58
+9 | ai-NPLyay-8608 | NPLyay | what and how can you help me | 2026-08-23 14:57:09
+10 | ai-NPLyay-8608 | TreamAI Agent | I'm TreamAI, a helpful AI assistant! I can assist you with a wide range of tasks, like answering your questions, providing information, generating creative content, summarizing topics, and much more. Just tell me what you need, and I'll do my best to help you out! | 2026-08-23 14:57:12
+11 | ai-NPLyay-8608 | NPLyay | hellofd efuvjhmsd fewuidhcvbnkjms rgvsuhikjb rgvrdshuikb edvxcuhdjknmr bhvj bvbyugrfwh ,dvc | 2026-08-23 15:00:58
+12 | ai-NPLyay-8608 | TreamAI Agent | Hello there! It looks like there might be a typo in your message, or perhaps I'm having a bit of trouble understanding it. Could you please rephrase what you're trying to say, or let me know how I can help you? | 2026-08-23 15:01:04
+13 | SLPERJB8 | NPLyay | hi | 2026-08-27 17:59:06
+
+=== Notifications (0 rows) ===
+id | username | title | message | is_read | created_at
+(empty)
+
+=== Friend_Nicknames (0 rows) ===
+user_name | friend_name | nickname
+(empty)

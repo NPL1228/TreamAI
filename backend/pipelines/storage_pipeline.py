@@ -9,7 +9,6 @@ from pipelines import pruning_pipeline
 # Number of buffered messages before summarization
 BUFFER_LIMIT = 5      # Change to 1 later if desired
 
-
 def process_incoming_message(chat_id: str, message: str, user_name: str):
 
     print("=" * 60)
@@ -26,12 +25,7 @@ def process_incoming_message(chat_id: str, message: str, user_name: str):
     print(f"Buffered messages: {len(messages)} / {BUFFER_LIMIT}")
 
     if len(messages) < BUFFER_LIMIT:
-    
-
-
-    
-    return None
-
+        return None
 
     try:
         return summarize_and_store(chat_id, messages)

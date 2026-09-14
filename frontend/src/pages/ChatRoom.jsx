@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Send, ArrowLeft, Bot, Info } from 'lucide-react';
+import { Send, ArrowLeft, Bot, Info, Paperclip, FileText, X } from 'lucide-react';
 
 export default function ChatRoom({ user }) {
   const { chatId } = useParams();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [fileUpload, setFileUpload] = useState(null);    // { file, previewUrl, uploading, error }
+  const fileInputRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
@@ -110,17 +112,68 @@ export default function ChatRoom({ user }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = (e) => {
+  const ALLOWED_TYPES = ['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.openxmlformats-officedocument.presentationml.presentation','text/plain','text/csv','application/zip','image/png','image/jpeg'];
+  const ALLOWED_EXT = ['.pdf','.docx','.xlsx','.pptx','.txt','.csv','.zip','.png','.jpg','.jpeg'];
+  const MAX_SIZE = 25 * 1024 * 1024;
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!ALLOWED_EXT.includes(ext)) {
+      setFileUpload({ error: `File type "${ext}" is not allowed.` });
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setFileUpload({ error: 'File exceeds the 25 MB size limit.' });
+      return;
+    }
+    const previewUrl = ['image/png','image/jpeg'].includes(file.type) ? URL.createObjectURL(file) : null;
+    setFileUpload({ file, previewUrl, uploading: false, error: null });
+  };
+
+  const sendMessage = async (e) => {
     e.preventDefault();
-    if (!input.trim() || !ws.current) return;
-    
+    if (!ws.current) return;
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+
+    // If there is a pending file, upload it first then send
+    if (fileUpload?.file) {
+      setFileUpload(prev => ({ ...prev, uploading: true }));
+      const formData = new FormData();
+      formData.append('file', fileUpload.file);
+      try {
+        const res = await fetch(`${baseUrl}/api/upload/${chatId}?username=${encodeURIComponent(user)}`, {
+          method: 'POST', body: formData
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          setFileUpload(prev => ({ ...prev, uploading: false, error: err.detail || 'Upload failed.' }));
+          return;
+        }
+        const data = await res.json();
+        const msgPayload = JSON.stringify({
+          text: input.trim() || '',
+          file_url: data.file_url,
+          file_name: data.file_name
+        });
+        const isExpectingReply = input.includes('@agent') || input.startsWith('?');
+        if (isExpectingReply) setIsWaitingForAgent(true);
+        ws.current.send(msgPayload);
+        setInput('');
+        setFileUpload(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } catch {
+        setFileUpload(prev => ({ ...prev, uploading: false, error: 'Upload failed. Please try again.' }));
+      }
+      return;
+    }
+
+    if (!input.trim()) return;
     const isExpectingReply = (chatInfo?.chat_type === 'private' && chatInfo?.chat_name === 'TreamAI Agent') ||
                              input.includes('@agent') || 
                              input.startsWith('?');
-    if (isExpectingReply) {
-      setIsWaitingForAgent(true);
-    }
-    
+    if (isExpectingReply) setIsWaitingForAgent(true);
     ws.current.send(input);
     setInput('');
   };
@@ -251,6 +304,25 @@ export default function ChatRoom({ user }) {
                       return <span key={i}>{part}</span>;
                     });
                   })()}
+                  {/* File Attachment Rendering */}
+                  {msg.file_url && (() => {
+                    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
+                    const fullUrl = `${baseUrl}${msg.file_url}`;
+                    const isImage = msg.file_url.match(/\.(png|jpg|jpeg)$/i);
+                    if (isImage) {
+                      return (
+                        <a href={fullUrl} target="_blank" rel="noreferrer">
+                          <img src={fullUrl} alt={msg.file_name} style={{ maxWidth: '220px', maxHeight: '180px', borderRadius: '8px', marginTop: msg.text ? '8px' : '0', display: 'block' }} />
+                        </a>
+                      );
+                    }
+                    return (
+                      <a href={fullUrl} download={msg.file_name} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: msg.text ? '8px' : '0', color: 'var(--secondary)', textDecoration: 'none', fontSize: '0.85rem' }}>
+                        <FileText size={16} />
+                        <span style={{ textDecoration: 'underline' }}>{msg.file_name}</span>
+                      </a>
+                    );
+                  })()}
                 </div>
               </div>
             );
@@ -294,37 +366,62 @@ export default function ChatRoom({ user }) {
               You are no longer an active member of this chat. You cannot send new messages.
             </div>
           ) : (
-            <form onSubmit={sendMessage} style={{ display: 'flex', gap: '10px' }}>
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage(e);
-                  }
-                }}
-                placeholder="Message this chat... (use @agent to ask TreamAI)"
-                className="input-field"
-                rows={1}
-                style={{ 
-                  flex: 1, 
-                  borderRadius: '24px', 
-                  padding: '16px 25px', 
-                  fontSize: '1.1rem',
-                  minHeight: '56px',
-                  maxHeight: '120px',
-                  resize: 'none',
-                  wordBreak: 'break-word',
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'inherit',
-                  overflowY: 'auto',
-                  lineHeight: '1.5'
-                }}
-              />
-              <button type="submit" className="btn-primary" style={{ borderRadius: '50%', width: '56px', height: '56px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Send size={24} style={{ marginLeft: '-2px' }} />
-              </button>
+            <form onSubmit={sendMessage} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* File preview banner */}
+              {fileUpload && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', background: 'rgba(255,255,255,0.06)', borderRadius: '10px', fontSize: '0.85rem' }}>
+                  {fileUpload.error ? (
+                    <span style={{ color: '#ff6b6b', flex: 1 }}>{fileUpload.error}</span>
+                  ) : fileUpload.previewUrl ? (
+                    <img src={fileUpload.previewUrl} alt="preview" style={{ height: '40px', width: '40px', objectFit: 'cover', borderRadius: '6px' }} />
+                  ) : (
+                    <FileText size={20} style={{ color: 'var(--secondary)' }} />
+                  )}
+                  {!fileUpload.error && <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fileUpload.file?.name}</span>}
+                  {fileUpload.uploading && <span style={{ color: 'var(--text-muted)' }}>Uploading…</span>}
+                  <button type="button" onClick={() => { setFileUpload(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}>
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {/* Hidden file input */}
+                <input ref={fileInputRef} type="file" accept=".pdf,.docx,.xlsx,.pptx,.txt,.csv,.zip,.png,.jpg,.jpeg" style={{ display: 'none' }} onChange={handleFileSelect} />
+                {/* Paperclip button */}
+                <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white', flexShrink: 0 }}>
+                  <Paperclip size={20} />
+                </button>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage(e);
+                    }
+                  }}
+                  placeholder="Message this chat... (use @agent to ask TreamAI)"
+                  className="input-field"
+                  rows={1}
+                  style={{ 
+                    flex: 1,
+                    borderRadius: '24px',
+                    padding: '16px 25px',
+                    fontSize: '1.1rem',
+                    minHeight: '56px',
+                    maxHeight: '120px',
+                    resize: 'none',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'inherit',
+                    overflowY: 'auto',
+                    lineHeight: '1.5'
+                  }}
+                />
+                <button type="submit" className="btn-primary" disabled={fileUpload?.uploading} style={{ borderRadius: '50%', width: '56px', height: '56px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Send size={24} style={{ marginLeft: '-2px' }} />
+                </button>
+              </div>
             </form>
           )}
         </div>
