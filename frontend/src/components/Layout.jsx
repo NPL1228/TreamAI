@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { MessageSquare, Users, LogOut, Settings, Hash, Bell, Bot } from 'lucide-react';
+import { MessageSquare, Users, User, LogOut, Settings, Hash, Bell, Bot } from 'lucide-react';
 
 export default function Layout({ user, onLogout, children }) {
   const navigate = useNavigate();
