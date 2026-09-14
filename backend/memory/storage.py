@@ -28,7 +28,7 @@ def init_db():
             chat_type     TEXT,
             description   TEXT,
             last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ai_listening  INTEGER DEFAULT 1,
+            ai_listening  INTEGER DEFAULT 0,
             created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -167,7 +167,7 @@ def register_user(username: str, email: str, password_hash: str) -> bool:
         
         # Auto-generate a private chat with the TreamAI Agent
         ai_chat_id = f"ai-{username}-{random.randint(1000, 9999)}"
-        conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, ?)", 
+        conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type, ai_listening) VALUES (?, ?, ?, 1)", 
                      (ai_chat_id, "TreamAI Agent", "private"))
         conn.execute("INSERT INTO Chat_Members (chat_id, user_name) VALUES (?, ?)", 
                      (ai_chat_id, username))
@@ -391,7 +391,7 @@ def register_user(username: str, email: str, password_hash: str) -> bool:
         
         # Auto-generate a private chat with the TreamAI Agent
         ai_chat_id = f"ai-{username}-{random.randint(1000, 9999)}"
-        conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, ?)", 
+        conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type, ai_listening) VALUES (?, ?, ?, 1)", 
                      (ai_chat_id, "TreamAI Agent", "private"))
         conn.execute("INSERT INTO Chat_Members (chat_id, user_name) VALUES (?, ?)", 
                      (ai_chat_id, username))
@@ -481,7 +481,7 @@ def accept_friend_request(user1: str, user2: str) -> bool:
         if not chat_id:
             # Generate new chat
             chat_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-            conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, 'private')", (chat_id, None))
+            conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type, ai_listening) VALUES (?, ?, 'private', 0)", (chat_id, None))
             conn.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'member')", (chat_id, user1))
             conn.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'member')", (chat_id, user2))
         conn.commit()
@@ -591,7 +591,7 @@ def create_chat(chat_name: str, chat_type: str, username: str) -> str:
     # Generate 8-character alphanumeric ID
     chat_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
     
-    conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type) VALUES (?, ?, ?)", 
+    conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type, ai_listening) VALUES (?, ?, ?, 0)", 
                  (chat_id, chat_name, chat_type))
     conn.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'owner')", 
                  (chat_id, username))
@@ -649,6 +649,16 @@ def delete_chat(chat_id: str, username: str = None) -> bool:
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        # Check if this is the TreamAI Agent chat
+        cursor.execute("SELECT chat_name FROM Chats WHERE chat_id = ?", (chat_id,))
+        chat_row = cursor.fetchone()
+        if chat_row and chat_row[0] == "TreamAI Agent":
+            # Just wipe the content, never hide the chat
+            cursor.execute("DELETE FROM Messages WHERE chat_id = ?", (chat_id,))
+            conn.commit()
+            conn.close()
+            return True
+            
         if username:
             cursor.execute("SELECT role FROM Chat_Members WHERE chat_id = ? AND user_name = ?", (chat_id, username))
             row = cursor.fetchone()

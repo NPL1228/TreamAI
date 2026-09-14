@@ -61,9 +61,45 @@ load_dotenv()
 
 app = FastAPI()
 
-# Serve uploaded files as static assets
+import time
+import asyncio
+from fastapi.responses import FileResponse, HTMLResponse
+
 os.makedirs("uploads", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+async def cleanup_old_files():
+    while True:
+        try:
+            if os.path.exists("uploads"):
+                current_time = time.time()
+                thirty_days_sec = 30 * 24 * 60 * 60
+                for root_dir, _, files in os.walk("uploads"):
+                    for file in files:
+                        file_path = os.path.join(root_dir, file)
+                        file_mtime = os.path.getmtime(file_path)
+                        if current_time - file_mtime > thirty_days_sec:
+                            os.remove(file_path)
+                            print(f"Deleted old file: {file_path}")
+        except Exception as e:
+            print(f"File cleanup error: {e}")
+        await asyncio.sleep(24 * 60 * 60)  # Check daily
+
+@app.get("/uploads/{chat_id}/{filename}")
+async def serve_upload(chat_id: str, filename: str):
+    file_path = os.path.join("uploads", chat_id, filename)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return HTMLResponse(
+        content="""
+        <html>
+            <body style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; background:#1f2229; color:white; flex-direction:column; text-align:center; padding:20px;">
+                <h2 style="color:#ef4444;">File Expired</h2>
+                <p style="color:#9ca3af; max-width:400px; line-height:1.5;">This file was uploaded more than 30 days ago and has been automatically permanently deleted from our servers to save storage space.</p>
+            </body>
+        </html>
+        """,
+        status_code=404
+    )
 
 app.add_middleware(
     CORSMiddleware,
@@ -124,6 +160,7 @@ manager = ConnectionManager()
 async def startup():
     init_db()
     print("Database initialized.")
+    asyncio.create_task(cleanup_old_files())
 
 
 @app.get("/")
@@ -257,8 +294,8 @@ async def forgot_password(req: ForgotPasswordRequest):
     if user:
         token = secrets.token_urlsafe(32)
         store_reset_token(req.email, token)
-        # Using hardcoded frontend port for the link (5173 is standard Vite)
-        reset_link = f"http://localhost:5173/reset-password?token={token}"
+        frontend_url = os.getenv("FRONTEND_URL", "https://treamai.vercel.app")
+        reset_link = f"{frontend_url}/reset-password?token={token}"
         send_reset_email(req.email, reset_link)
     # Always return success to prevent email enumeration
     return {"status": "success", "message": "If that email exists, a reset link was sent."}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Info, Users, Hash, Edit3, Check, X, Copy, Bot, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Info, Users, Hash, Edit3, Check, X, Copy, Bot, MessageSquare, Trash2 } from 'lucide-react';
 
 export default function ChatInfo({ user }) {
   const { chatId } = useParams();
@@ -97,6 +97,28 @@ export default function ChatInfo({ user }) {
     } catch (err) {
       console.error("Failed to toggle AI", err);
       setAiListening(!newStatus);
+    }
+  };
+
+  const handleDeleteChat = async () => {
+    const isAgent = chatInfo?.chat_name === 'TreamAI Agent';
+    const msg = isAgent 
+      ? "Are you sure you want to clear the AI message history?" 
+      : "Are you sure you want to delete this chat from your list?";
+      
+    if (window.confirm(msg)) {
+      try {
+        const res = await fetch(`${baseUrl}/api/chats/${chatId}?username=${encodeURIComponent(user)}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          navigate('/dashboard');
+        } else {
+          alert('Failed to delete chat');
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -274,6 +296,26 @@ export default function ChatInfo({ user }) {
             </div>
           </>
         )}
+
+        {/* Danger Zone */}
+        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '25px', borderRadius: '16px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', gap: '20px', marginTop: '20px' }}>
+          <div>
+            <h2 style={{ fontSize: '1.2rem', margin: '0 0 5px 0', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Trash2 size={20} /> Danger Zone
+            </h2>
+            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+              {chatInfo.chat_name === 'TreamAI Agent' 
+                ? 'Wipe the message history for this AI chat. The chat itself will remain in your sidebar.'
+                : 'Remove this chat from your list. You will lose access to the message history.'}
+            </p>
+          </div>
+          <button 
+            onClick={handleDeleteChat}
+            style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', flexShrink: 0, width: isMobile ? '100%' : 'auto' }}
+          >
+            {chatInfo.chat_name === 'TreamAI Agent' ? 'Clear History' : 'Delete Chat'}
+          </button>
+        </div>
 
       </div>
     </div>
