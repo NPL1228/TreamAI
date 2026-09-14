@@ -95,7 +95,7 @@ export default function Settings({ user, onUserUpdate, theme, setTheme }) {
                 {isSaving ? '...' : 'Save'}
               </button>
             ) : (
-              <button onClick={() => setIsEditing(true)} className="btn-primary" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', padding: '12px 20px', height: '48px' }}>Edit</button>
+              <button onClick={() => setIsEditing(true)} className="btn-primary hover-bg" style={{ background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', padding: '12px 20px', height: '48px', boxShadow: 'none' }}>Edit</button>
             )}
           </div>
           <div>

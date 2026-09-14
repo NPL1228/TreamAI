@@ -256,10 +256,10 @@ export default function ChatRoom({ user }) {
                 <div style={{
                   padding: '12px 18px',
                   borderRadius: '16px',
-                  background: isMe ? 'linear-gradient(135deg, var(--primary), var(--secondary))' : 
+                  background: isMe ? 'var(--bubble-me)' : 
                              (isAgent ? 'rgba(99, 102, 241, 0.1)' : 'var(--input-bg)'),
                   border: isAgent ? '1px solid var(--secondary)' : '1px solid var(--border)',
-                  color: (isMe || isAgent) ? 'var(--text-main)' : 'var(--text-main)',
+                  color: isMe ? 'var(--bubble-text)' : 'var(--text-main)',
                   borderBottomRightRadius: isMe ? '4px' : '16px',
                   borderBottomLeftRadius: !isMe ? '4px' : '16px',
                   boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
@@ -268,7 +268,7 @@ export default function ChatRoom({ user }) {
                 }}>
                   {/* Render the sender name inside the bubble */}
                   {!isMe && (
-                    <div style={{ fontSize: '0.75rem', color: msg.color || 'var(--primary)', marginBottom: '6px', fontWeight: 'bold' }}>
+                    <div style={{ fontSize: '0.75rem', color: isAgent ? 'var(--text-main)' : (msg.color || 'var(--primary)'), marginBottom: '6px', fontWeight: 'bold' }}>
                       {isAgent ? 'TreamAI Agent' : (nicknames[msg.sender] || msg.sender)}
                     </div>
                   )}
@@ -352,7 +352,7 @@ export default function ChatRoom({ user }) {
                 wordBreak: 'break-word',
                 whiteSpace: 'pre-wrap'
               }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--secondary)', marginBottom: '6px', fontWeight: 'bold' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', marginBottom: '6px', fontWeight: 'bold' }}>
                   TreamAI Agent
                 </div>
                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>

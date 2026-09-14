@@ -138,7 +138,7 @@ export default function Layout({ user, onLogout, children }) {
             width: '45px',
             height: '45px',
             borderRadius: '50%',
-            background: '#191b21',
+            background: 'var(--bg-dark)',
             border: '1px solid var(--border)',
             cursor: 'pointer',
             display: 'flex',

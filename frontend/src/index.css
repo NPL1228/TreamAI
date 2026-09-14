@@ -12,6 +12,8 @@
   --popup-bg: #1f222b;
   --hover-bg: rgba(255, 255, 255, 0.05);
   --sidebar-active-bg: rgba(255, 255, 255, 0.1);
+  --bubble-me: linear-gradient(135deg, var(--primary), var(--secondary));
+  --bubble-text: white;
   
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -30,6 +32,8 @@
   --popup-bg: #ffffff;
   --hover-bg: rgba(147, 51, 234, 0.08);
   --sidebar-active-bg: rgba(126, 34, 206, 0.1);
+  --bubble-me: linear-gradient(135deg, #9333ea, #a855f7);
+  --bubble-text: white;
 }
 
 * {
