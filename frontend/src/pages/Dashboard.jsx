@@ -28,6 +28,14 @@ export default function Dashboard({ user, onLogout }) {
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     document.title = 'Dashboard | TreamAI';
     fetchData();
@@ -162,9 +170,9 @@ export default function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <div style={{ padding: '40px' }}>
+    <div style={{ padding: isMobile ? '25px 20px 20px 20px' : '40px' }}>
       
-      <h1 style={{ fontSize: '2rem', marginBottom: '40px' }}>Dashboard</h1>
+      <h1 style={{ fontSize: '2rem', marginLeft: '20px', marginBottom: '40px' }}>Dashboard</h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px' }}>
           
@@ -203,8 +211,8 @@ export default function Dashboard({ user, onLogout }) {
               <h3 style={{ fontSize: '1rem', marginBottom: '10px' }}>Join via Code</h3>
               <form onSubmit={handleJoinTeam} style={{ display: 'flex', gap: '10px' }}>
                 <input type="text" className="input-field" placeholder="8-digit code" value={joinCode} onChange={(e) => setJoinCode(e.target.value)} required />
-                <button type="submit" className="btn-primary" disabled={isJoiningTeam} style={{ background: isJoiningTeam ? 'var(--text-muted)' : 'var(--primary)' }}>
-                  {isJoiningTeam ? '...' : 'Join'}
+                <button type="submit" className="btn-primary" disabled={isJoiningTeam} style={{ display: 'flex', padding: '10px 19px', justifyContent: 'center', alignItems: 'center', gap: '8px', background: isJoiningTeam ? 'var(--text-muted)' : 'var(--primary)' }}>
+                  {isJoiningTeam ? '...' : <><Plus size={18} /> Join</>}
                 </button>
               </form>
               {joinError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '5px' }}>{joinError}</p>}
@@ -214,7 +222,7 @@ export default function Dashboard({ user, onLogout }) {
               <h3 style={{ fontSize: '1rem', marginBottom: '10px' }}>Create New Team</h3>
               <form onSubmit={handleCreateTeam} style={{ display: 'flex', gap: '10px' }}>
                 <input type="text" className="input-field" placeholder="Team Name" value={newChatName} onChange={(e) => setNewChatName(e.target.value)} required />
-                <button type="submit" className="btn-primary" disabled={isCreatingTeam} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: isCreatingTeam ? 'var(--text-muted)' : 'var(--primary)' }}>
+                <button type="submit" className="btn-primary" disabled={isCreatingTeam} style={{ display: 'flex', padding: '10px 12px', justifyContent: 'center', alignItems: 'center', gap: '8px', background: isCreatingTeam ? 'var(--text-muted)' : 'var(--primary)' }}>
                   {isCreatingTeam ? '...' : <><Plus size={18} /> Create</>}
                 </button>
               </form>

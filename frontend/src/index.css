@@ -14,6 +14,8 @@
   --sidebar-active-bg: rgba(255, 255, 255, 0.1);
   --bubble-me: linear-gradient(135deg, var(--primary), var(--secondary));
   --bubble-text: white;
+  --role-owner-text: #eab308;
+  --role-owner-bg: rgba(234, 179, 8, 0.2);
   
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -34,6 +36,8 @@
   --sidebar-active-bg: rgba(126, 34, 206, 0.1);
   --bubble-me: linear-gradient(135deg, #9333ea, #a855f7);
   --bubble-text: white;
+  --role-owner-text: #854d0e;
+  --role-owner-bg: rgba(234, 179, 8, 0.15);
 }
 
 * {
@@ -41,7 +45,7 @@
   margin: 0;
   padding: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.5) rgba(25, 27, 33, 0.2);
+  scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
 }
 
 /* Custom Scrollbar */
@@ -51,18 +55,26 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(25, 27, 33, 0.2);
+  background: transparent;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.4);
+  background: var(--border);
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.7);
+  background: var(--primary-glow);
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 body {
   font-family: var(--font-family);

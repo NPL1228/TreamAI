@@ -203,8 +203,8 @@ export default function Layout({ user, onLogout, children }) {
                     }}
                     className={location.pathname !== `/chat/${agentChat.chat_id}` ? "hover-bg" : ""}
                   >
-                    <Bot size={16} color={location.pathname === `/chat/${agentChat.chat_id}` ? "var(--text-active)" : "var(--text-muted)"} />
-                    <span style={{ fontSize: '0.95rem', fontWeight: '600' }}>{agentChat.chat_name}</span>
+                    <Bot size={16} color={location.pathname === `/chat/${agentChat.chat_id}` ? "var(--text-active)" : "var(--text-muted)"} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.95rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '25px', display: 'block' }}>{agentChat.chat_name}</span>
                     {agentChat.unread > 0 && (
                       <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
                         {agentChat.unread > 99 ? '99+' : agentChat.unread}
@@ -236,8 +236,8 @@ export default function Layout({ user, onLogout, children }) {
                     }}
                     className={location.pathname !== `/chat/${chat.chat_id}` ? "hover-bg" : ""}
                   >
-                    <User size={20} color={location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)'} />
-                    <span style={{ fontSize: '0.95rem' }}>{chat.chat_name}</span>
+                    <User size={20} color={location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)'} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '25px', display: 'block' }}>{chat.chat_name}</span>
                     {chat.unread > 0 && (
                       <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
                         {chat.unread > 99 ? '99+' : chat.unread}
@@ -273,8 +273,8 @@ export default function Layout({ user, onLogout, children }) {
                     }}
                     className={location.pathname !== `/chat/${chat.chat_id}` ? "hover-bg" : ""}
                   >
-                    <Users size={20} color={location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)'} />
-                    <span style={{ fontSize: '0.95rem' }}>{chat.chat_name}</span>
+                    <Users size={20} color={location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)'} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '25px', display: 'block' }}>{chat.chat_name}</span>
                     {chat.unread > 0 && (
                       <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
                         {chat.unread > 99 ? '99+' : chat.unread}

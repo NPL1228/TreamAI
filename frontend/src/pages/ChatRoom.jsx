@@ -16,6 +16,14 @@ export default function ChatRoom({ user }) {
   const [nicknames, setNicknames] = useState({});
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isWaitingForAgent, setIsWaitingForAgent] = useState(false);
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+    }
+  }, [input]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -181,13 +189,15 @@ export default function ChatRoom({ user }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
       
-      <header style={{ padding: isMobile ? '60px 10px 15px 10px' : '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '20px' }}>
-          <button onClick={() => navigate('/dashboard')} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}>
+      <header style={{ padding: isMobile ? '15px 20px 15px 10px' : '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '20px', flex: 1, minWidth: 0 }}>
+          <button onClick={() => navigate('/dashboard')} style={{ marginTop: '5px', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', flexShrink: 0 }}>
             <ArrowLeft size={24} />
           </button>
-          <div>
-            <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.4rem', margin: 0, wordBreak: 'break-word', maxWidth: isMobile ? '180px' : 'auto' }}>{chatInfo ? chatInfo.chat_name : `#${chatId}`}</h2>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.4rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: isMobile ? '180px' : '400px' }}>
+              {chatInfo ? chatInfo.chat_name : `#${chatId}`}
+            </h2>
           </div>
         </div>
         <button 
@@ -203,7 +213,9 @@ export default function ChatRoom({ user }) {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            transition: 'background 0.2s ease'
+            transition: 'background 0.2s ease',
+            flexShrink: 0,
+            marginRight: '50px'
           }}
           className="hover-bg"
         >
@@ -226,9 +238,11 @@ export default function ChatRoom({ user }) {
               `}</style>
             </div>
           ) : messages.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '50px' }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '50px', padding: '0 20px' }}>
               <Bot size={48} style={{ opacity: 0.5, marginBottom: '15px' }} />
-              <h3>Welcome to #{chatInfo ? chatInfo.chat_name : `#${chatId}`}</h3>
+              <h3 style={{ margin: '0 auto 10px auto', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+                Welcome to {chatInfo ? chatInfo.chat_name : `#${chatId}`}
+              </h3>
               <p>Ready to collaborate? Send your first message to get started.</p>
             </div>
           ) : messages.map((msg, idx) => {
@@ -368,7 +382,7 @@ export default function ChatRoom({ user }) {
         </div>
 
         {/* Input Area */}
-        <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'transparent' }}>
+        <div style={{ padding: '5px 0', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'transparent' }}>
           {chatInfo?.members && !chatInfo.members.some(m => m.username === user && m.role !== 'left') ? (
             <div style={{ textAlign: 'center', padding: '15px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
               You are no longer an active member of this chat. You cannot send new messages.
@@ -387,19 +401,29 @@ export default function ChatRoom({ user }) {
                   )}
                   {!fileUpload.error && <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fileUpload.file?.name}</span>}
                   {fileUpload.uploading && <span style={{ color: 'var(--text-muted)' }}>Uploading…</span>}
-                  <button type="button" onClick={() => { setFileUpload(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}>
+                  <button type="button" onClick={() => { setFileUpload(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, marginTop: '10px' }}>
                     <X size={16} />
                   </button>
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'flex-end', 
+                background: 'var(--input-bg)', 
+                border: '1px solid var(--border)', 
+                borderRadius: '28px',
+                padding: '4px'
+              }}>
                 {/* Hidden file input */}
                 <input ref={fileInputRef} type="file" accept=".pdf,.docx,.xlsx,.pptx,.txt,.csv,.zip,.png,.jpg,.jpeg" style={{ display: 'none' }} onChange={handleFileSelect} />
+                
                 {/* Paperclip button */}
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="hover-bg" style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-main)', flexShrink: 0 }}>
-                  <Paperclip size={20} />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="hover-bg" style={{ background: 'transparent', border: 'none', borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', flexShrink: 0 }}>
+                  <Paperclip size={22} />
                 </button>
+                
                 <textarea
+                  ref={textareaRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -408,15 +432,18 @@ export default function ChatRoom({ user }) {
                       sendMessage(e);
                     }
                   }}
-                  placeholder="Message this chat... (use @agent to ask TreamAI)"
-                  className="input-field"
+                  placeholder="Message (use @agent to ask TreamAI)"
+                  className="hide-scrollbar"
                   rows={1}
                   style={{ 
                     flex: 1,
-                    borderRadius: '24px',
-                    padding: '16px 25px',
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    color: 'var(--text-main)',
+                    padding: '12px 10px',
                     fontSize: '1.1rem',
-                    minHeight: '56px',
+                    minHeight: '48px',
                     maxHeight: '120px',
                     resize: 'none',
                     wordBreak: 'break-word',
@@ -426,8 +453,8 @@ export default function ChatRoom({ user }) {
                     lineHeight: '1.5'
                   }}
                 />
-                <button type="submit" className="btn-primary" disabled={fileUpload?.uploading} style={{ borderRadius: '50%', width: '56px', height: '56px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Send size={24} style={{ marginLeft: '-2px' }} />
+                <button type="submit" className="btn-primary" disabled={fileUpload?.uploading} style={{ borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Send size={20} style={{ marginLeft: '-2px' }} />
                 </button>
               </div>
             </form>

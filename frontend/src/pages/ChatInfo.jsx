@@ -124,10 +124,10 @@ export default function ChatInfo({ user }) {
               <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {chatInfo.chat_type === 'private' ? <MessageSquare size={32} color="white" /> : <Hash size={32} color="white" />}
               </div>
-              <div style={{ flex: 1 }}>
-                <h2 style={{ margin: 0, fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h2 style={{ margin: 0, fontSize: '1.6rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', wordBreak: 'break-word' }}>
                   {chatInfo.chat_name}
-                  <span style={{ fontSize: '0.8rem', padding: '2px 8px', background: 'rgba(99, 102, 241, 0.2)', color: 'var(--primary)', borderRadius: '10px', textTransform: 'capitalize' }}>
+                  <span style={{ fontSize: '0.8rem', padding: '2px 8px', background: 'rgba(99, 102, 241, 0.2)', color: 'var(--primary)', borderRadius: '10px', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
                     {chatInfo.chat_type}
                   </span>
                 </h2>
@@ -185,7 +185,7 @@ export default function ChatInfo({ user }) {
 
         {/* AI Agent Toggles */}
         {chatInfo.chat_type === 'team' && isOwner && (
-          <div style={{ padding: '0 30px' }}>
+          <div style={{ padding: '0 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', background: 'var(--input-bg)', border: '1px solid var(--primary)', borderRadius: '12px', boxShadow: '0 0 15px var(--primary-glow)' }}>
               <div>
                 <h3 style={{ margin: '0 0 5px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -198,8 +198,9 @@ export default function ChatInfo({ user }) {
               <button 
                 onClick={handleToggleAI}
                 style={{ 
-                  width: '50px', 
+                  width: isMobile ? '80px' : '50px', 
                   height: '26px', 
+                  marginRight: isMobile ? '-5px' : '0px',
                   background: aiListening ? 'var(--primary)' : 'var(--border)', 
                   borderRadius: '13px',
                   position: 'relative',
@@ -239,7 +240,7 @@ export default function ChatInfo({ user }) {
                     {nicknames[member.username] || member.username} {member.username === user && '(You)'}
                   </span>
                 </div>
-                <span style={{ fontSize: '0.85rem', padding: '4px 12px', background: member.role === 'owner' ? 'rgba(234, 179, 8, 0.2)' : 'var(--input-bg)', color: member.role === 'owner' ? '#eab308' : 'var(--text-muted)', borderRadius: '20px', textTransform: 'capitalize' }}>
+                <span style={{ fontSize: '0.85rem', padding: '4px 12px', background: member.role === 'owner' ? 'var(--role-owner-bg)' : 'var(--input-bg)', color: member.role === 'owner' ? 'var(--role-owner-text)' : 'var(--text-muted)', borderRadius: '20px', textTransform: 'capitalize' }}>
                   {member.role}
                 </span>
               </div>
