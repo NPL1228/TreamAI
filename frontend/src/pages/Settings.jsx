@@ -8,6 +8,7 @@ export default function Settings({ user, onUserUpdate, theme, setTheme }) {
   const [email, setEmail] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState({ type: '', msg: '' });
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -58,7 +59,7 @@ export default function Settings({ user, onUserUpdate, theme, setTheme }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '25px 20px 20px 20px' : '40px', maxWidth: '800px', margin: '0 auto' }}>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>

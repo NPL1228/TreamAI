@@ -435,7 +435,7 @@ def get_user_chats(username: str) -> list:
                 other_name = other[0]
                 cursor.execute("SELECT nickname FROM Friend_Nicknames WHERE user_name = ? AND friend_name = ?", (username, other_name))
                 nick = cursor.fetchone()
-                chat_name = nick[0] if nick else other_name
+                chat_name = nick[0] if (nick and nick[0]) else other_name
                 
         role = r[5]
         chats.append({"chat_id": chat_id, "chat_name": chat_name, "chat_type": chat_type, "last_activity": last_activity, "unread": unread, "role": role})

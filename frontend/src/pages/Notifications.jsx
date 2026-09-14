@@ -6,6 +6,7 @@ export default function Notifications({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8443';
 
@@ -90,7 +91,7 @@ export default function Notifications({ user }) {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '40px', maxWidth: '800px', margin: '0 auto', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '25px 20px 20px 20px' : '40px', maxWidth: '800px', margin: '0 auto', height: '100%' }}>
       
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px' }}>
         <h1 style={{ fontSize: '2rem', margin: 0, display: 'flex', alignItems: 'center', gap: '15px' }}>

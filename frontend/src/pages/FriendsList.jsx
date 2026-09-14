@@ -170,7 +170,7 @@ export default function FriendsList({ user }) {
   const filteredFriends = friends.filter(f => f.username.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '40px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '25px 20px 20px 20px' : '40px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -215,22 +215,29 @@ export default function FriendsList({ user }) {
 
         {/* Right Column */}
         <div className="glass-panel animate-fade-in" style={{ padding: '30px', flex: 1, animationDelay: '0.2s', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Users size={20} color="var(--primary)" /> Friend List
-          </h2>
-          <div style={{ position: 'relative', width: '250px' }}>
-            <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="Search friends..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: '38px' }}
-            />
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row', 
+            justifyContent: 'space-between', 
+            alignItems: isMobile ? 'stretch' : 'center', 
+            gap: isMobile ? '15px' : '0',
+            marginBottom: '20px' 
+          }}>
+            <h2 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Users size={20} color="var(--primary)" /> Friend List
+            </h2>
+            <div style={{ position: 'relative', width: isMobile ? '100%' : '250px' }}>
+              <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Search friends..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{ paddingLeft: '38px', width: '100%' }}
+              />
+            </div>
           </div>
-        </div>
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {filteredFriends.map((f, i) => (

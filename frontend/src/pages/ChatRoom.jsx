@@ -329,16 +329,22 @@ export default function ChatRoom({ user }) {
                     const isImage = msg.file_url.match(/\.(png|jpg|jpeg)$/i);
                     if (isImage) {
                       return (
-                        <a href={fullUrl} target="_blank" rel="noreferrer">
-                          <img src={fullUrl} alt={msg.file_name} style={{ maxWidth: '220px', maxHeight: '180px', borderRadius: '8px', marginTop: msg.text ? '8px' : '0', display: 'block' }} />
-                        </a>
+                        <div style={{ marginTop: msg.text ? '10px' : '0' }}>
+                          <a href={fullUrl} target="_blank" rel="noreferrer">
+                            <img src={fullUrl} alt={msg.file_name} style={{ maxWidth: '220px', maxHeight: '180px', borderRadius: '8px', display: 'block' }} />
+                          </a>
+                        </div>
                       );
                     }
                     return (
-                      <a href={fullUrl} download={msg.file_name} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: msg.text ? '8px' : '0', color: 'var(--secondary)', textDecoration: 'none', fontSize: '0.85rem' }}>
-                        <FileText size={16} />
-                        <span style={{ textDecoration: 'underline' }}>{msg.file_name}</span>
-                      </a>
+                      <div style={{ marginTop: msg.text ? '10px' : '0' }}>
+                        <a href={fullUrl} download={msg.file_name} target="_blank" rel="noreferrer" className="hover-bg" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', background: isMe ? 'rgba(255, 255, 255, 0.15)' : 'var(--bg-dark)', borderRadius: '12px', border: isMe ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid var(--border)', color: isMe ? 'var(--bubble-text)' : 'var(--text-main)', textDecoration: 'none', fontSize: '0.9rem', width: 'fit-content' }}>
+                          <div style={{ background: isMe ? 'rgba(255, 255, 255, 0.2)' : 'var(--input-bg)', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <FileText size={18} color={isMe ? 'white' : 'var(--primary)'} />
+                          </div>
+                          <span style={{ fontWeight: '500', wordBreak: 'break-all' }}>{msg.file_name}</span>
+                        </a>
+                      </div>
                     );
                   })()}
                 </div>
@@ -432,7 +438,7 @@ export default function ChatRoom({ user }) {
                       sendMessage(e);
                     }
                   }}
-                  placeholder="Message (use @agent to ask TreamAI)"
+                  placeholder="Message (@agent to ask TreamAI)"
                   className="hide-scrollbar"
                   rows={1}
                   style={{ 
@@ -442,7 +448,7 @@ export default function ChatRoom({ user }) {
                     outline: 'none',
                     color: 'var(--text-main)',
                     padding: '12px 10px',
-                    fontSize: '1.1rem',
+                    fontSize: isMobile ? '0.9rem' : '1.1rem',
                     minHeight: '48px',
                     maxHeight: '120px',
                     resize: 'none',
