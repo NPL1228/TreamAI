@@ -575,9 +575,22 @@ def get_chat_info(chat_id: str):
     cursor = conn.cursor()
     cursor.execute("SELECT user_name, role, joined_at FROM Chat_Members WHERE chat_id = ?", (chat_id,))
     rows = cursor.fetchall()
-    conn.close()
     
     chat["members"] = [{"username": r[0], "role": r[1], "joined_at": r[2], "color": get_user_color(chat_id, r[0])} for r in rows]
+    
+    # Check if they are still friends (for private chats)
+    chat["is_friend"] = True
+    if chat["chat_type"] == 'private' and chat["chat_name"] != 'TreamAI Agent' and len(rows) >= 2:
+        # Get active members
+        active = [r[0] for r in rows if r[1] != 'left']
+        if len(active) == 2:
+            u1, u2 = active[0], active[1]
+            cursor.execute("SELECT 1 FROM Friendships WHERE status = 'accepted' AND ((user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?))", (u1, u2, u2, u1))
+            chat["is_friend"] = bool(cursor.fetchone())
+        else:
+            chat["is_friend"] = False
+            
+    conn.close()
     return chat
 
 def update_chat_description(chat_id: str, description: str) -> bool:

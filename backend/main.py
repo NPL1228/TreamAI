@@ -533,6 +533,10 @@ async def websocket_endpoint(websocket: WebSocket, chat_id: str, username: str):
             # Allow agents, or active members
             if username != 'TreamAI Agent' and not is_active_member:
                 continue
+                
+            # Block messaging if they are no longer friends in a private chat
+            if info and info.get("is_friend") is False:
+                continue
 
             # Persist and broadcast the user's message
             save_message(chat_id, username, text, file_url=file_url, file_name=file_name)

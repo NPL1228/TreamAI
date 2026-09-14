@@ -394,7 +394,11 @@ export default function ChatRoom({ user }) {
 
         {/* Input Area */}
         <div style={{ padding: '5px 0', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'transparent' }}>
-          {chatInfo?.members && !chatInfo.members.some(m => m.username === user && m.role !== 'left') ? (
+          {chatInfo?.chat_type === 'private' && chatInfo.chat_name !== 'TreamAI Agent' && chatInfo.is_friend === false ? (
+            <div style={{ textAlign: 'center', padding: '15px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+              You are no longer friends with this user. You cannot send new messages.
+            </div>
+          ) : chatInfo?.members && !chatInfo.members.some(m => m.username === user && m.role !== 'left') ? (
             <div style={{ textAlign: 'center', padding: '15px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
               You are no longer an active member of this chat. You cannot send new messages.
             </div>
