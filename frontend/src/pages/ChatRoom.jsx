@@ -247,27 +247,32 @@ export default function ChatRoom({ user }) {
             const isAgent = msg.sender === 'TreamAI Agent';
 
             return (
-              <div key={idx} style={{
-                alignSelf: isMe ? 'flex-end' : 'flex-start',
-                maxWidth: '70%',
+              <div key={idx} style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: isMe ? 'flex-end' : 'flex-start',
+                marginBottom: '15px',
                 animation: 'fadeIn 0.3s ease'
               }}>
-                <div style={{ fontSize: '0.75rem', color: isMe || isAgent ? 'var(--text-muted)' : (msg.color || 'var(--text-muted)'), marginBottom: '4px', marginLeft: '4px', textAlign: isMe ? 'right' : 'left' }}>
-                  {nicknames[msg.sender] || msg.sender}
-                </div>
                 <div style={{
                   padding: '12px 18px',
                   borderRadius: '16px',
                   background: isMe ? 'linear-gradient(135deg, var(--primary), var(--secondary))' : 
-                             isAgent ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.3)',
-                  border: isAgent ? '1px solid var(--secondary)' : 'none',
-                  color: 'white',
+                             (isAgent ? 'rgba(99, 102, 241, 0.1)' : 'var(--input-bg)'),
+                  border: isAgent ? '1px solid var(--secondary)' : '1px solid var(--border)',
+                  color: (isMe || isAgent) ? 'white' : 'var(--text-main)',
                   borderBottomRightRadius: isMe ? '4px' : '16px',
                   borderBottomLeftRadius: !isMe ? '4px' : '16px',
                   boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
                   wordBreak: 'break-word',
                   whiteSpace: 'pre-wrap'
                 }}>
+                  {/* Render the sender name inside the bubble */}
+                  {!isMe && !isAgent && (
+                    <div style={{ fontSize: '0.75rem', color: msg.color || 'var(--primary)', marginBottom: '6px', fontWeight: 'bold' }}>
+                      {nicknames[msg.sender] || msg.sender}
+                    </div>
+                  )}
                   {(() => {
                     const parts = msg.text.split(/(\[\[.*?\|.*?\]\])/g);
                     return parts.map((part, i) => {
@@ -329,29 +334,33 @@ export default function ChatRoom({ user }) {
           })}
           
           {isWaitingForAgent && (
-            <div style={{
-              alignSelf: 'flex-start',
-              maxWidth: '70%',
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'flex-start',
+              marginBottom: '15px',
               animation: 'fadeIn 0.3s ease'
             }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', marginLeft: '4px', textAlign: 'left' }}>
-                TreamAI Agent
-              </div>
               <div style={{
                 padding: '12px 18px',
                 borderRadius: '16px',
-                background: 'rgba(255, 255, 255, 0.1)',
+                background: 'rgba(99, 102, 241, 0.1)',
                 border: '1px solid var(--secondary)',
                 color: 'white',
+                borderBottomRightRadius: '16px',
                 borderBottomLeftRadius: '4px',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                display: 'flex',
-                gap: '4px',
-                alignItems: 'center'
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-wrap'
               }}>
-                <span className="dot-anim" style={{ animationDelay: '0s' }}>.</span>
-                <span className="dot-anim" style={{ animationDelay: '0.2s' }}>.</span>
-                <span className="dot-anim" style={{ animationDelay: '0.4s' }}>.</span>
+                <div style={{ fontSize: '0.75rem', color: 'var(--secondary)', marginBottom: '6px', fontWeight: 'bold' }}>
+                  TreamAI Agent
+                </div>
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  <span className="dot-anim" style={{ animationDelay: '0s' }}>.</span>
+                  <span className="dot-anim" style={{ animationDelay: '0.2s' }}>.</span>
+                  <span className="dot-anim" style={{ animationDelay: '0.4s' }}>.</span>
+                </div>
               </div>
             </div>
           )}

@@ -197,13 +197,13 @@ export default function Layout({ user, onLogout, children }) {
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: '10px',
-                      background: location.pathname === `/chat/${agentChat.chat_id}` ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                      color: location.pathname === `/chat/${agentChat.chat_id}` ? 'white' : 'var(--text-main)',
+                      background: location.pathname === `/chat/${agentChat.chat_id}` ? 'var(--sidebar-active-bg)' : 'transparent',
+                      color: location.pathname === `/chat/${agentChat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)',
                       position: 'relative'
                     }}
-                    className="hover-bg"
+                    className={location.pathname !== `/chat/${agentChat.chat_id}` ? "hover-bg" : ""}
                   >
-                    <Bot size={16} color={location.pathname === `/chat/${agentChat.chat_id}` ? "var(--primary)" : "var(--text-muted)"} />
+                    <Bot size={16} color={location.pathname === `/chat/${agentChat.chat_id}` ? "var(--text-active)" : "var(--text-muted)"} />
                     <span style={{ fontSize: '0.95rem', fontWeight: '600' }}>{agentChat.chat_name}</span>
                     {agentChat.unread > 0 && (
                       <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
@@ -224,19 +224,19 @@ export default function Layout({ user, onLogout, children }) {
                     key={chat.chat_id}
                     onClick={() => handleNavigate(`/chat/${chat.chat_id}`)}
                     style={{ 
-                      padding: '8px 12px', 
-                      borderRadius: '8px', 
-                      cursor: 'pointer',
+                      padding: '12px 15px', 
+                      borderRadius: '12px', 
+                      cursor: 'pointer', 
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: '10px',
-                      background: location.pathname === `/chat/${chat.chat_id}` ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                      color: location.pathname === `/chat/${chat.chat_id}` ? 'white' : 'var(--text-main)',
+                      background: location.pathname === `/chat/${chat.chat_id}` ? 'var(--sidebar-active-bg)' : 'transparent',
+                      color: location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)',
                       position: 'relative'
                     }}
-                    className="hover-bg"
+                    className={location.pathname !== `/chat/${chat.chat_id}` ? "hover-bg" : ""}
                   >
-                    <MessageSquare size={16} color={location.pathname === `/chat/${chat.chat_id}` ? "var(--primary)" : "var(--text-muted)"} />
+                    <User size={20} color={location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)'} />
                     <span style={{ fontSize: '0.95rem' }}>{chat.chat_name}</span>
                     {chat.unread > 0 && (
                       <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
@@ -245,6 +245,7 @@ export default function Layout({ user, onLogout, children }) {
                     )}
                   </div>
                 ))}
+                {privateChats.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>No private chats yet.</p>}
                 {privateChats.length > 0 && (
                   <span onClick={() => handleNavigate('/chats/private')} style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer', marginTop: '5px' }}>Show More...</span>
                 )}
@@ -260,19 +261,19 @@ export default function Layout({ user, onLogout, children }) {
                     key={chat.chat_id}
                     onClick={() => handleNavigate(`/chat/${chat.chat_id}`)}
                     style={{ 
-                      padding: '8px 12px', 
-                      borderRadius: '8px', 
-                      cursor: 'pointer',
+                      padding: '12px 15px', 
+                      borderRadius: '12px', 
+                      cursor: 'pointer', 
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: '10px',
-                      background: location.pathname === `/chat/${chat.chat_id}` ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                      color: location.pathname === `/chat/${chat.chat_id}` ? 'white' : 'var(--text-main)',
+                      background: location.pathname === `/chat/${chat.chat_id}` ? 'var(--sidebar-active-bg)' : 'transparent',
+                      color: location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)',
                       position: 'relative'
                     }}
-                    className="hover-bg"
+                    className={location.pathname !== `/chat/${chat.chat_id}` ? "hover-bg" : ""}
                   >
-                    <Hash size={16} color={location.pathname === `/chat/${chat.chat_id}` ? "var(--primary)" : "var(--text-muted)"} />
+                    <Users size={20} color={location.pathname === `/chat/${chat.chat_id}` ? 'var(--text-active)' : 'var(--text-main)'} />
                     <span style={{ fontSize: '0.95rem' }}>{chat.chat_name}</span>
                     {chat.unread > 0 && (
                       <div style={{ position: 'absolute', right: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', padding: '0 4px' }}>
@@ -295,7 +296,7 @@ export default function Layout({ user, onLogout, children }) {
             {isPopupMounted && (
               <div style={{ 
                 position: 'absolute', bottom: '70px', left: '20px', right: '20px', 
-                background: '#1f2229', border: '1px solid var(--border)', 
+                background: 'var(--popup-bg)', border: '1px solid var(--border)', 
                 borderRadius: '12px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '5px', 
                 zIndex: 30, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', 
                 opacity: isPopupVisible ? 1 : 0,
