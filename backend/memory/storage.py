@@ -484,6 +484,9 @@ def accept_friend_request(user1: str, user2: str) -> bool:
             conn.execute("INSERT INTO Chats (chat_id, chat_name, chat_type, ai_listening) VALUES (?, ?, 'private', 0)", (chat_id, None))
             conn.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'member')", (chat_id, user1))
             conn.execute("INSERT INTO Chat_Members (chat_id, user_name, role) VALUES (?, ?, 'member')", (chat_id, user2))
+        else:
+            # Ensure the reused chat is un-hidden for both users
+            conn.execute("UPDATE Chat_Members SET is_deleted = 0 WHERE chat_id = ?", (chat_id,))
         conn.commit()
         conn.close()
         return True
