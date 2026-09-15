@@ -20,15 +20,16 @@ export default function ChatRoom({ user }) {
 
   useEffect(() => {
     if (textareaRef.current) {
+      const minH = isMobile ? 40 : 48;
       if (!input) {
-        textareaRef.current.style.height = '48px';
+        textareaRef.current.style.height = `${minH}px`;
       } else {
-        textareaRef.current.style.height = '48px';
+        textareaRef.current.style.height = `${minH}px`;
         const scrollHeight = textareaRef.current.scrollHeight;
-        textareaRef.current.style.height = Math.min(Math.max(scrollHeight, 48), 120) + 'px';
+        textareaRef.current.style.height = Math.min(Math.max(scrollHeight, minH), 120) + 'px';
       }
     }
-  }, [input]);
+  }, [input, isMobile]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -192,7 +193,7 @@ export default function ChatRoom({ user }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px 0px 5px 0px', maxWidth: '1100px', margin: '0 auto', height: '100%' }}>
       
       <header style={{ padding: isMobile ? '0px' : '0px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '20px', flex: 1, minWidth: 0 }}>
@@ -393,7 +394,7 @@ export default function ChatRoom({ user }) {
         </div>
 
         {/* Input Area */}
-        <div style={{ padding: '5px 0', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'transparent' }}>
+        <div style={{ marginBottom: '-5px', padding: '5px 0', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'transparent' }}>
           {chatInfo?.chat_type === 'private' && chatInfo.chat_name !== 'TreamAI Agent' && chatInfo.is_friend === false ? (
             <div style={{ textAlign: 'center', padding: '15px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
               You are no longer friends with this user. You cannot send new messages.
@@ -433,8 +434,8 @@ export default function ChatRoom({ user }) {
                 <input ref={fileInputRef} type="file" accept=".pdf,.docx,.xlsx,.pptx,.txt,.csv,.zip,.png,.jpg,.jpeg" style={{ display: 'none' }} onChange={handleFileSelect} />
                 
                 {/* Paperclip button */}
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="hover-bg" style={{ background: 'transparent', border: 'none', borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', flexShrink: 0 }}>
-                  <Paperclip size={22} />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="hover-bg" style={{ background: 'transparent', border: 'none', borderRadius: '50%', width: isMobile ? '40px' : '48px', height: isMobile ? '40px' : '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', flexShrink: 0 }}>
+                  <Paperclip size={isMobile ? 20 : 22} />
                 </button>
                 
                 <textarea
@@ -452,13 +453,14 @@ export default function ChatRoom({ user }) {
                   rows={1}
                   style={{ 
                     flex: 1,
+                    minWidth: 0,
                     background: 'transparent',
                     border: 'none',
                     outline: 'none',
                     color: 'var(--text-main)',
-                    padding: '12px 10px',
+                    padding: isMobile ? '10px' : '12px 10px',
                     fontSize: isMobile ? '0.9rem' : '1.1rem',
-                    minHeight: '48px',
+                    minHeight: isMobile ? '40px' : '48px',
                     maxHeight: '120px',
                     resize: 'none',
                     wordBreak: 'break-word',
@@ -468,8 +470,8 @@ export default function ChatRoom({ user }) {
                     lineHeight: '1.5'
                   }}
                 />
-                <button type="submit" className="btn-primary" disabled={fileUpload?.uploading} style={{ borderRadius: '50%', width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Send size={20} style={{ marginLeft: '-2px' }} />
+                <button type="submit" className="btn-primary" disabled={fileUpload?.uploading} style={{ borderRadius: '50%', width: isMobile ? '40px' : '48px', height: isMobile ? '40px' : '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Send size={isMobile ? 18 : 20} style={{ marginLeft: '-2px' }} />
                 </button>
               </div>
             </form>
