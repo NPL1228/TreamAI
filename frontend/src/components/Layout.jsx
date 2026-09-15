@@ -170,7 +170,7 @@ export default function Layout({ user, onLogout, children }) {
           opacity: isSidebarOpen ? 1 : 0,
           pointerEvents: isSidebarOpen ? 'auto' : 'none',
           transition: 'opacity 0.2s ease',
-          padding: '20px 0',
+          padding: '20px 0px 0px 0px',
           overflowY: 'hidden'
         }}>
         
@@ -292,10 +292,10 @@ export default function Layout({ user, onLogout, children }) {
           </div>
 
           {/* Footer Actions (Popup) */}
-          <div ref={popupRef} style={{ flexShrink: 0, position: 'relative', padding: '10px 20px 0 10px', borderTop: '1px solid var(--border)' }}>
+          <div ref={popupRef} style={{ flexShrink: 0, position: 'relative', padding: '10px', borderTop: '1px solid var(--border)' }}>
             {isPopupMounted && (
               <div style={{ 
-                position: 'absolute', bottom: '70px', left: '20px', right: '20px', 
+                position: 'absolute', bottom: '80px', left: '20px', right: '20px', 
                 background: 'var(--popup-bg)', border: '1px solid var(--border)', 
                 borderRadius: '12px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '5px', 
                 zIndex: 30, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', 
