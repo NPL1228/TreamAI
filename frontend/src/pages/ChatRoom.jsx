@@ -194,13 +194,13 @@ export default function ChatRoom({ user }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
       
-      <header style={{ padding: isMobile ? '15px 20px 15px 10px' : '15px 25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+      <header style={{ padding: isMobile ? '0px' : '0px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '20px', flex: 1, minWidth: 0 }}>
           <button onClick={() => navigate('/dashboard')} style={{ marginTop: '5px', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', flexShrink: 0 }}>
             <ArrowLeft size={24} />
           </button>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.4rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: isMobile ? '180px' : '400px' }}>
+            <h2 style={{ fontSize: isMobile ? '1.2rem' : '1.4rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: isMobile ? '220px' : '700px' }}>
               {chatInfo ? chatInfo.chat_name : `#${chatId}`}
             </h2>
           </div>
@@ -220,7 +220,7 @@ export default function ChatRoom({ user }) {
             justifyContent: 'center',
             transition: 'background 0.2s ease',
             flexShrink: 0,
-            marginRight: '50px'
+            marginRight: isMobile ? '50px' : '0px'
           }}
           className="hover-bg"
         >

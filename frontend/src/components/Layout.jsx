@@ -133,8 +133,8 @@ export default function Layout({ user, onLogout, children }) {
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           style={{
             position: isMobile ? 'fixed' : 'absolute',
-            top: '20px',
-            right: isMobile ? '20px' : (isSidebarOpen ? '-23px' : '-75px'),
+            top: '7px',
+            right: isMobile ? '10px' : (isSidebarOpen ? '-23px' : '-75px'),
             width: '45px',
             height: '45px',
             borderRadius: '50%',

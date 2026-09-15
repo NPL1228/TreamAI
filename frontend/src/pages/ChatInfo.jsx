@@ -206,7 +206,7 @@ export default function ChatInfo({ user }) {
         </div>
 
         {chatInfo.chat_name === 'TreamAI Agent' ? (
-          <div style={{ padding: '0 20px' }}>
+          <div style={{ marginTop: '-40px', padding: '20px' }}>
             <div style={{ padding: '30px', background: 'transparent', borderRadius: '16px', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
                 <div style={{ padding: '12px', background: 'rgba(99, 102, 241, 0.2)', borderRadius: '12px', color: 'var(--primary)' }}>
