@@ -197,8 +197,8 @@ export default function ChatList({ user, type }) {
                     <div className="animate-fade-in" style={{ 
                       position: 'absolute', 
                       right: 0, 
-                      top: '35px',
-                      background: 'var(--popup-bg)', 
+                      top: '100%', 
+                      background: 'var(--bg-panel)', 
                       border: '1px solid var(--border)', 
                       borderRadius: '8px', 
                       padding: '5px', 
@@ -206,7 +206,7 @@ export default function ChatList({ user, type }) {
                       width: '120px', 
                       boxShadow: '0 4px 12px rgba(0,0,0,0.5)' 
                     }}>
-                      {chat.role === 'left' ? (
+                      {type === 'private' || chat.role === 'left' ? (
                         <button 
                           onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: chat.chat_id, action: 'delete' }); setActiveMenu(null); }}
                           style={{ width: '100%', background: 'transparent', border: 'none', color: '#ef4444', padding: '10px', textAlign: 'left', cursor: 'pointer', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}

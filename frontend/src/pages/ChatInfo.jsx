@@ -122,6 +122,29 @@ export default function ChatInfo({ user }) {
     }
   };
 
+  const handleLeaveChat = async () => {
+    if (window.confirm("You will no longer receive messages from this chat. Another owner can add you back.")) {
+      try {
+        const res = await fetch(`${baseUrl}/api/chats/${chatId}/leave`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user })
+        });
+        if (res.ok) {
+          navigate('/dashboard');
+        } else {
+          alert('Failed to leave chat');
+        }
+      } catch (err) {
+        console.error("Failed to leave chat", err);
+      }
+    }
+  };
+  
+  // Check if user has left
+  const myMember = chatInfo?.members?.find(m => m.username === user);
+  const hasLeft = myMember?.role === 'left';
+
   if (loading) return <div style={{ padding: '40px', color: 'var(--text-main)' }}>Loading...</div>;
   if (!chatInfo) return <div style={{ padding: '40px', color: 'var(--text-main)' }}>Chat not found</div>;
 
@@ -314,14 +337,28 @@ export default function ChatInfo({ user }) {
           <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
             {chatInfo.chat_name === 'TreamAI Agent' 
               ? 'Wipe the message history for this AI chat. The chat itself will remain in your sidebar.'
-              : 'Remove this chat from your list. You will lose access to the message history.'}
+              : (chatInfo.chat_type === 'team' && !hasLeft)
+                ? 'Leave this team chat. You will no longer receive messages.'
+                : 'Remove this chat from your list. You will lose access to the message history.'}
           </p>
         </div>
         <button 
-          onClick={handleDeleteChat}
-          style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', flexShrink: 0, width: isMobile ? '100%' : 'auto' }}
+          onClick={() => {
+            if (chatInfo.chat_name === 'TreamAI Agent' || chatInfo.chat_type === 'private' || hasLeft) {
+              handleDeleteChat();
+            } else {
+              handleLeaveChat();
+            }
+          }}
+          style={{ background: (chatInfo.chat_type === 'team' && !hasLeft && chatInfo.chat_name !== 'TreamAI Agent') ? '#f59e0b' : '#ef4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', flexShrink: 0, width: isMobile ? '100%' : 'auto' }}
         >
-          {chatInfo.chat_name === 'TreamAI Agent' ? 'Clear History' : 'Delete Chat'}
+          {chatInfo.chat_name === 'TreamAI Agent' 
+            ? 'Clear History' 
+            : (chatInfo.chat_type === 'team' && !hasLeft) 
+              ? 'Leave Chat' 
+              : (chatInfo.chat_type === 'team' && hasLeft)
+                ? 'Remove Chat'
+                : 'Delete Chat'}
         </button>
       </div>
 
