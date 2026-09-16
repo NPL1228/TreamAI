@@ -7,9 +7,10 @@ from memory import storage, chroma
 PRUNING_CONFIG = {
     "discard_threshold": 0.8,        # prune_score above this -> delete
     "consolidate_threshold": 0.5,    # prune_score above this -> consolidate
-    "decay_rate": 0.1,                # (é) controls frequency decay speed
+    "decay_rate": 0.1,                # (λ) controls frequency decay speed
     "max_age_days": 30,               # denominator for age_factor
-    "pruning_trigger": "hybrid"       # daily + emergency if node count > threshold
+    "pruning_trigger": "hybrid",      # daily + emergency if node count > threshold
+    "emergency_node_limit": 50        # triggers emergency prune if chat exceeds this
 }
 
 def run_adaptive_pruning(chat_id: str):
@@ -78,7 +79,14 @@ def run_adaptive_pruning(chat_id: str):
 
 def trigger_pruning_check(chat_id: str):
     if PRUNING_CONFIG["pruning_trigger"] in ["hybrid", "count-based"]:
-        run_adaptive_pruning(chat_id)
+        try:
+            nodes_data = chroma.get_all_nodes(chat_id)
+            if nodes_data and nodes_data.get("ids"):
+                if len(nodes_data["ids"]) >= PRUNING_CONFIG["emergency_node_limit"]:
+                    print(f"Emergency limit reached ({len(nodes_data['ids'])} >= {PRUNING_CONFIG['emergency_node_limit']}). Triggering prune.")
+                    run_adaptive_pruning(chat_id)
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     import sys

@@ -121,17 +121,22 @@ Return ONLY JSON.
         "suggested_name": None
     }
 
-def generate_response(query: str, nodes: list, chat_history: list = None) -> str:
+def generate_response(query: str, project_nodes: list, chat_nodes: list = None, chat_history: list = None) -> str:
     """
     Generate a response to the user's query using retrieved memory nodes and chat history.
     Also cites which nodes were used.
     """
     client = get_client()
     
-    context_text = ""
-    for node in nodes:
-        context_text += f"- [ID: {node['id']}] ({node['type']}): {node['content']}\n"
+    project_context = ""
+    for node in project_nodes:
+        project_context += f"- [ID: {node['id']}] ({node['type']}): {node['content']}\n"
         
+    team_context = ""
+    if chat_nodes:
+        for node in chat_nodes:
+            team_context += f"- [ID: {node['id']}] ({node['type']}): {node['content']}\n"
+            
     history_text = ""
     if chat_history:
         history_text = "Recent Conversation History:\n" + "\n".join(
@@ -143,8 +148,11 @@ def generate_response(query: str, nodes: list, chat_history: list = None) -> str
     
     {history_text}
     
-    Context Memories:
-    {context_text}
+    Project Memory:
+    {project_context}
+    
+    Team Context (implicit team conventions and preferences):
+    {team_context}
     
     User Query: {query}
     
@@ -213,6 +221,32 @@ Return ONLY a JSON object in this format:
         }
     return result
 
+def classify_query_types(query: str) -> list:
+    """Infer which types of memory nodes are most likely relevant to the user query."""
+    client = get_client()
+    prompt = f"""
+    Analyze the following user query and determine which memory node types might contain the answer.
+    Possible types: project_task, project_decision, project_progress, project_issue, team_convention, team_preference.
+    
+    Query: "{query}"
+    
+    Return ONLY a JSON array of strings containing the relevant types.
+    Example: ["project_decision", "project_task"]
+    """
+    
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(response_mime_type="application/json", temperature=0.0)
+        )
+        data = json.loads(response.text)
+        if isinstance(data, list):
+            return data
+        return []
+    except Exception as e:
+        print(f"Classification error: {e}")
+        return []
 
 def evaluate_memory_nodes(query: str, response: str, nodes: list) -> dict:
     """
