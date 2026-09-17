@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Send, ArrowLeft, Bot, Info, Paperclip, FileText, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 export default function ChatRoom({ user }) {
   const { chatId } = useParams();
@@ -323,6 +324,13 @@ export default function ChatRoom({ user }) {
                           >
                             {match[1]}
                           </button>
+                        );
+                      }
+                      if (isAgent) {
+                        return (
+                          <div key={i} className="agent-markdown">
+                            <ReactMarkdown>{part}</ReactMarkdown>
+                          </div>
                         );
                       }
                       return <span key={i}>{part}</span>;

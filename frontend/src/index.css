@@ -203,3 +203,9 @@ select.input-field option {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
 }
+
+.agent-markdown p { margin-top: 0; margin-bottom: 0.5em; }
+.agent-markdown p:last-child { margin-bottom: 0; }
+.agent-markdown pre { background: var(--bg-dark); padding: 10px; border-radius: 8px; overflow-x: auto; }
+.agent-markdown code { font-family: monospace; background: var(--bg-dark); padding: 2px 4px; border-radius: 4px; }
+
