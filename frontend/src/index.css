@@ -209,3 +209,7 @@ select.input-field option {
 .agent-markdown pre { background: var(--bg-dark); padding: 10px; border-radius: 8px; overflow-x: auto; }
 .agent-markdown code { font-family: monospace; background: var(--bg-dark); padding: 2px 4px; border-radius: 4px; }
 
+
+.agent-markdown ul, .agent-markdown ol { padding-left: 20px; margin-top: 0.5em; margin-bottom: 0.5em; }
+.agent-markdown li { margin-bottom: 0.25em; }
+
